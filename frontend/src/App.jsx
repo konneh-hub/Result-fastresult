@@ -1,7 +1,8 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
+import Topbar from './components/Topbar/Topbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -106,10 +107,26 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="App">
-          <Navbar />
-          <main>
-            <Routes>
+        <AppContent />
+      </Router>
+    </AuthProvider>
+  );
+}
+
+function AppContent() {
+  const location = useLocation();
+
+  const publicPaths = ['/', '/about', '/universities', '/contact', '/login', '/register/student', '/register/lecturer', '/forgot-password'];
+
+  const isPublicPage = publicPaths.includes(location.pathname);
+  const isAdminPage = location.pathname.startsWith('/admin/');
+
+  return (
+    <div className="App">
+      {isPublicPage && <Navbar />}
+      {isAdminPage && <Topbar />}
+      <main>
+        <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
@@ -137,6 +154,11 @@ function App() {
               <Route path="/admin/activity-logs" element={<ProtectedRoute role="University ICT Admin"><ActivityLogs /></ProtectedRoute>} />
               <Route path="/admin/profile" element={<ProtectedRoute role="University ICT Admin"><ProfileSettings /></ProtectedRoute>} />
               <Route path="/admin/change-password" element={<ProtectedRoute role="University ICT Admin"><ChangePassword /></ProtectedRoute>} />
+
+              {/* Redirect legacy role paths */}
+              <Route path="/university-ict-admin/*" element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="/university-ict admin/*" element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="/university-ict%20admin/*" element={<Navigate to="/admin/dashboard" replace />} />
 
               <Route path="/exam-officer/dashboard" element={<ProtectedRoute role="Exam Officer"><ExamOfficerDashboard /></ProtectedRoute>} />
               <Route path="/exam-officer/submitted-results" element={<ProtectedRoute role="Exam Officer"><SubmittedResults /></ProtectedRoute>} />
@@ -212,9 +234,7 @@ function App() {
           </main>
           <Footer />
         </div>
-      </Router>
-    </AuthProvider>
-  );
-}
+      );
+    }
 
 export default App;

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import api from '../services/api';
 
 const AuthContext = createContext();
 
@@ -13,7 +14,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       // Fetch user profile
-      axios.get('/api/auth/profile/')
+      api.profile()
         .then(response => {
           setUser(response.data);
         })
@@ -26,14 +27,19 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const response = await axios.post('/api/auth/login/', { username, password });
-      const { token, user } = response.data;
+      const response = await api.login({ username, password });
+      const { token, user: loginUser } = response.data;
+
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      // Some backend responses may not include the user object; fall back to /profile
+      const user = loginUser || (await api.profile()).data;
+
       setUser(user);
-      return { success: true };
+      return { success: true, user };
     } catch (error) {
-      return { success: false, error: error.response.data };
+      return { success: false, error: error.response?.data || 'Login failed' };
     }
   };
 
@@ -45,19 +51,19 @@ export const AuthProvider = ({ children }) => {
 
   const registerStudent = async (data) => {
     try {
-      await axios.post('/api/auth/register/student/', data);
+      await api.registerStudent(data);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.response.data };
+      return { success: false, error: error.response?.data || 'Registration failed' };
     }
   };
 
   const registerLecturer = async (data) => {
     try {
-      await axios.post('/api/auth/register/lecturer/', data);
+      await api.registerLecturer(data);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.response.data };
+      return { success: false, error: error.response?.data || 'Registration failed' };
     }
   };
 

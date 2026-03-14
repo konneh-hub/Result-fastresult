@@ -2,6 +2,21 @@ import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../contexts/AuthContext';
 
+const normalizeRole = (role) => (role || '').toString().trim().toLowerCase();
+
+const roleToPath = (role) => {
+  const normalized = normalizeRole(role);
+  const map = {
+    'university ict admin': 'admin',
+    'exam officer': 'exam-officer',
+    dean: 'dean',
+    'head of department': 'hod',
+    lecturer: 'lecturer',
+    student: 'student',
+  };
+  return map[normalized] || normalized.replace(/\s+/g, '-');
+};
+
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -10,6 +25,8 @@ const Navbar = () => {
     logout();
     navigate('/');
   };
+
+  const rolePath = user?.role ? roleToPath(user.role) : '';
 
   return (
     <nav className="navbar">
@@ -23,7 +40,7 @@ const Navbar = () => {
         <li><Link to="/contact">Contact</Link></li>
         {user ? (
           <>
-            <li><Link to={`/${user.role.toLowerCase().replace(' ', '-')}/dashboard`}>Dashboard</Link></li>
+            {rolePath && <li><Link to={`/${rolePath}/dashboard`}>Dashboard</Link></li>}
             <li><button onClick={handleLogout}>Logout</button></li>
           </>
         ) : (

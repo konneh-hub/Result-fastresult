@@ -1,0 +1,54 @@
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-color);
+}
+
+.dashboard-content {
+  flex: 1;
+  margin-left: 250px;
+  padding: 80px 20px 20px 20px;
+  background: var(--bg-color);
+  min-height: 100vh;
+}
+
+.dashboard-content h1 {
+  margin-bottom: 30px;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  text-align: center;
+  transition: transform 0.2s;
+  border: 1px solid var(--border-color);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+.stat-card h3 {
+  margin: 0 0 10px 0;
+  color: var(--text-secondary);
+  font-size: 1.1em;
+  font-weight: 500;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 2em;
+  font-weight: bold;
+  color: var(--students-color);
+}

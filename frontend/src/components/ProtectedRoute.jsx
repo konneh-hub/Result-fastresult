@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import AuthContext from '../contexts/AuthContext';
 
+const normalizeRole = (role) => (role || '').toString().trim().toLowerCase();
+
 const ProtectedRoute = ({ role, children }) => {
   const { user, loading } = useContext(AuthContext);
 
@@ -9,7 +11,7 @@ const ProtectedRoute = ({ role, children }) => {
 
   if (!user) return <Navigate to="/login" />;
 
-  if (user.role !== role) return <Navigate to="/" />;
+  if (normalizeRole(user.role) !== normalizeRole(role)) return <Navigate to="/" />;
 
   return children;
 };

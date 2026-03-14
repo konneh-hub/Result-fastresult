@@ -11,9 +11,18 @@ from .models import (
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
+    role = serializers.SerializerMethodField()
+
+    def get_role(self, obj):
+        try:
+            profile = UserProfile.objects.get(user=obj)
+            return profile.role.name
+        except UserProfile.DoesNotExist:
+            return None
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'date_joined')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'date_joined', 'role')
         read_only_fields = ('id', 'date_joined')
 
 class LoginSerializer(serializers.Serializer):
@@ -91,6 +100,16 @@ class ProgramSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
+        fields = '__all__'
+
+class CourseAssignmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourseAssignment
+        fields = '__all__'
+
+class CourseRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourseRegistration
         fields = '__all__'
 
 class LecturerSerializer(serializers.ModelSerializer):

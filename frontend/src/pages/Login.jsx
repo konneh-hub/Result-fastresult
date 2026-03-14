@@ -8,11 +8,33 @@ const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const normalizeRole = (role) => (role || '').toString().trim().toLowerCase();
+
+  const roleToPath = (role) => {
+    const normalized = normalizeRole(role);
+    const map = {
+      'university ict admin': 'admin',
+      'exam officer': 'exam-officer',
+      dean: 'dean',
+      'head of department': 'hod',
+      lecturer: 'lecturer',
+      student: 'student',
+    };
+    return map[normalized] || normalized.replace(/\s+/g, '-');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await login(username, password);
+    if (result.success && result.user) {
+      const rolePath = roleToPath(result.user.role);
+      if (rolePath) {
+        navigate(`/${rolePath}/dashboard`);
+        return;
+      }
+    }
     if (result.success) {
-      navigate(`/${result.user.role.toLowerCase().replace(' ', '-')}/dashboard`);
+      navigate('/');
     } else {
       alert('Login failed');
     }

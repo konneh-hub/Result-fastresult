@@ -1,46 +1,49 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
 import AuthContext from '../../contexts/AuthContext';
 import api from '../../services/api';
+import Sidebar from '../../components/Sidebar';
+import './Dashboard.css';
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
   const [stats, setStats] = useState({});
 
   useEffect(() => {
-    // Fetch university stats
-    // Assuming user has university_id
-    api.get(`/universities/${user.university_id}/stats/`).then(response => setStats(response.data));
+    // Fetch university stats (if available)
+    if (!user?.university_id) return;
+
+    api
+      .get(`/universities/${user.university_id}/stats/`)
+      .then(response => setStats(response.data))
+      .catch(() => {
+        // Ignore -- stats endpoint may not exist yet
+      });
   }, [user]);
 
   return (
-    <div className="dashboard">
-      <h1>University ICT Admin Dashboard</h1>
-      <div className="stats">
-        <div>Total Students: {stats.total_students}</div>
-        <div>Total Lecturers: {stats.total_lecturers}</div>
-        <div>Active Courses: {stats.active_courses}</div>
-        <div>Pending Results: {stats.pending_results}</div>
+    <div className="dashboard-container">
+      <Sidebar />
+      <div className="dashboard-content">
+        <h1>University ICT Admin Dashboard</h1>
+        <div className="stats-cards">
+          <div className="stat-card">
+            <h3>Total Students</h3>
+            <p>{stats.total_students || 0}</p>
+          </div>
+          <div className="stat-card">
+            <h3>Total Lecturers</h3>
+            <p>{stats.total_lecturers || 0}</p>
+          </div>
+          <div className="stat-card">
+            <h3>Active Courses</h3>
+            <p>{stats.active_courses || 0}</p>
+          </div>
+          <div className="stat-card">
+            <h3>Pending Results</h3>
+            <p>{stats.pending_results || 0}</p>
+          </div>
+        </div>
       </div>
-      <nav>
-        <ul>
-          <li><Link to="/admin/faculties">Manage Faculties</Link></li>
-          <li><Link to="/admin/departments">Manage Departments</Link></li>
-          <li><Link to="/admin/programs">Manage Programs</Link></li>
-          <li><Link to="/admin/courses">Manage Courses</Link></li>
-          <li><Link to="/admin/upload-students">Upload Student Information</Link></li>
-          <li><Link to="/admin/upload-lecturers">Upload Lecturer Information</Link></li>
-          <li><Link to="/admin/sessions">Manage Academic Sessions</Link></li>
-          <li><Link to="/admin/semesters">Manage Semesters</Link></li>
-          <li><Link to="/admin/assign-roles">Assign Roles</Link></li>
-          <li><Link to="/admin/user-management">User Management</Link></li>
-          <li><Link to="/admin/reports">Reports & Analytics</Link></li>
-          <li><Link to="/admin/notifications">Notifications</Link></li>
-          <li><Link to="/admin/activity-logs">Activity Logs</Link></li>
-          <li><Link to="/admin/profile">Profile Settings</Link></li>
-          <li><Link to="/admin/change-password">Change Password</Link></li>
-        </ul>
-      </nav>
     </div>
   );
 };
