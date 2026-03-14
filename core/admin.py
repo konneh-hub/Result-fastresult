@@ -152,9 +152,9 @@ class ActivityLogAdmin(admin.ModelAdmin):
 
 @admin.register(Notification)
 class NotificationAdmin(BaseAdmin):
-    list_display = ('user', 'message', 'is_read', 'created_at')
-    list_filter = ('is_read', 'created_at')
-    search_fields = ('user__username', 'message')
+    list_display = ('title', 'recipient_type', 'sent_by', 'created_at', 'university')
+    list_filter = ('recipient_type', 'is_read', 'created_at', 'university')
+    search_fields = ('title', 'message', 'sent_by__username')
 
 @admin.register(SystemBackup)
 class SystemBackupAdmin(BaseAdmin):

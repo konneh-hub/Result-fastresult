@@ -29,6 +29,8 @@ import ActivityLogs from './pages/UniversityAdmin/Management/ActivityLogs';
 import ProfileSettings from './pages/UniversityAdmin/Management/ProfileSettings';
 import ChangePassword from './pages/UniversityAdmin/Management/ChangePassword';
 
+import AdminAccountCreation from './pages/UniversityAdmin/Management/AdminAccountCreation';
+
 import ExamOfficerDashboard from './pages/ExamOfficer/Dashboard';
 import SubmittedResults from './pages/ExamOfficer/SubmittedResults';
 import PendingApprovals from './pages/ExamOfficer/PendingApprovals';
@@ -149,6 +151,7 @@ function AppContent() {
               <Route path="/admin/semesters" element={<ProtectedRoute role="University ICT Admin"><Semesters /></ProtectedRoute>} />
               <Route path="/admin/assign-roles" element={<ProtectedRoute role="University ICT Admin"><AssignRoles /></ProtectedRoute>} />
               <Route path="/admin/user-management" element={<ProtectedRoute role="University ICT Admin"><UserManagement /></ProtectedRoute>} />
+              <Route path="/admin/create-admin" element={<ProtectedRoute role="University ICT Admin"><AdminAccountCreation /></ProtectedRoute>} />
               <Route path="/admin/reports" element={<ProtectedRoute role="University ICT Admin"><Reports /></ProtectedRoute>} />
               <Route path="/admin/notifications" element={<ProtectedRoute role="University ICT Admin"><Notifications /></ProtectedRoute>} />
               <Route path="/admin/activity-logs" element={<ProtectedRoute role="University ICT Admin"><ActivityLogs /></ProtectedRoute>} />

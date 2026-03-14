@@ -6,12 +6,8 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await api.forgotPassword({ email });
-      alert('Password reset email sent');
-    } catch (error) {
-      alert('Error sending reset email');
-    }
+    // TODO: Implement forgot password functionality
+    alert('Password reset functionality is not yet implemented. Please contact your administrator.');
   };
 
   return (

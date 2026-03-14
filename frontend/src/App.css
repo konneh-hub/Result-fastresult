@@ -65,13 +65,13 @@ body {
 
 main {
   flex: 1;
-  padding: 20px;
+  padding: 15px;
 }
 
 /* Navbar */
 .navbar {
   background: linear-gradient(135deg, var(--bg-color), var(--topbar-color));
-  padding: 1rem 2rem;
+  padding: 0.8rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -81,7 +81,7 @@ main {
 .navbar-brand a {
   color: var(--text-main);
   text-decoration: none;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
 }
 

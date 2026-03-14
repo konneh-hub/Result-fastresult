@@ -7,7 +7,13 @@ const Dashboard = () => {
   const [gpa, setGpa] = useState(0);
 
   useEffect(() => {
-    api.getGPA(user.id).then(response => setGpa(response.data.gpa));
+    api.get(`/students/${user.id}/gpa/`).then(response => {
+      // Assuming the response contains GPA records, get the latest one
+      const gpaRecords = response.data;
+      if (gpaRecords.length > 0) {
+        setGpa(gpaRecords[gpaRecords.length - 1].gpa);
+      }
+    });
   }, [user]);
 
   return (

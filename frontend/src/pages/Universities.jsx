@@ -5,7 +5,7 @@ const Universities = () => {
   const [universities, setUniversities] = useState([]);
 
   useEffect(() => {
-    api.getUniversities().then(response => setUniversities(response.data));
+    api.get('/universities/').then(response => setUniversities(response.data));
   }, []);
 
   return (

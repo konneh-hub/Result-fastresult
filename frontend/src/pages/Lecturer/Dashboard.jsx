@@ -7,7 +7,7 @@ const Dashboard = () => {
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
-    api.getAssignedCourses(user.id).then(response => setCourses(response.data));
+    api.get(`/lecturers/${user.id}/courses/`).then(response => setCourses(response.data));
   }, [user]);
 
   return (

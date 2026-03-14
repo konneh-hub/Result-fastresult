@@ -102,6 +102,9 @@ class UserProfile(models.Model):
 class Faculty(models.Model):
     university = models.ForeignKey(University, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
+    code = models.CharField(max_length=10, unique=True, null=True, blank=True)
+    dean = models.ForeignKey('Lecturer', on_delete=models.SET_NULL, null=True, blank=True, related_name='dean_of_faculty')
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
@@ -113,6 +116,9 @@ class Faculty(models.Model):
 class Department(models.Model):
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
+    code = models.CharField(max_length=10, unique=True, null=True, blank=True)
+    head = models.ForeignKey('Lecturer', on_delete=models.SET_NULL, null=True, blank=True, related_name='head_of_department')
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
@@ -124,6 +130,16 @@ class Department(models.Model):
 class Program(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
+    code = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    degree_type = models.CharField(max_length=10, choices=[
+        ('BSc', 'Bachelor of Science'),
+        ('BA', 'Bachelor of Arts'),
+        ('BEng', 'Bachelor of Engineering'),
+        ('MSc', 'Master of Science'),
+        ('MA', 'Master of Arts'),
+        ('PhD', 'Doctor of Philosophy')
+    ], default='BSc')
+    duration_years = models.IntegerField(default=4)
 
     def __str__(self):
         return self.name
@@ -169,6 +185,14 @@ class Lecturer(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField()
+    rank = models.CharField(max_length=50, choices=[
+        ('Professor', 'Professor'),
+        ('Associate Professor', 'Associate Professor'),
+        ('Senior Lecturer', 'Senior Lecturer'),
+        ('Lecturer', 'Lecturer'),
+        ('Assistant Lecturer', 'Assistant Lecturer'),
+        ('Instructor', 'Instructor')
+    ], default='Lecturer')
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -187,6 +211,7 @@ class Student(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField()
+    level = models.IntegerField(default=1)  # Year level (1, 2, 3, 4, 5, etc.)
     enrollment_date = models.DateField()
     is_active = models.BooleanField(default=True)
 
@@ -199,6 +224,7 @@ class Student(models.Model):
 # Course Management
 class Course(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, null=True, blank=True)
     code = models.CharField(max_length=20)
     name = models.CharField(max_length=255)
     credits = models.IntegerField()
@@ -330,13 +356,26 @@ class ActivityLog(models.Model):
         db_table = 'activity_logs'
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255, default='Notification')
     message = models.TextField()
+    recipient_type = models.CharField(max_length=20, choices=[
+        ('all', 'All Users'),
+        ('students', 'All Students'),
+        ('lecturers', 'All Lecturers'),
+        ('department', 'Specific Department'),
+        ('faculty', 'Specific Faculty'),
+        ('individual', 'Individual User')
+    ], default='all')
+    recipient_department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+    recipient_faculty = models.ForeignKey(Faculty, on_delete=models.SET_NULL, null=True, blank=True)
+    recipient_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    sent_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='sent_notifications')
+    university = models.ForeignKey(University, on_delete=models.CASCADE)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Notification for {self.user}"
+        return f"{self.title} - {self.recipient_type}"
 
     class Meta:
         db_table = 'notifications'

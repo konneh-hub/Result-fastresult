@@ -19,6 +19,22 @@
   flex-shrink: 0;
 }
 
+.toggle-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+  margin-bottom: 10px;
+}
+
+.toggle-btn:hover {
+  background: var(--hover-bg);
+}
+
 .sidebar-header h3 {
   margin: 0;
   color: var(--text-main);
@@ -38,7 +54,8 @@
 }
 
 .sidebar-menu li a {
-  display: block;
+  display: flex;
+  align-items: center;
   padding: 12px 15px;
   text-decoration: none;
   color: var(--text-secondary);
@@ -47,10 +64,51 @@
   font-weight: 500;
 }
 
-.sidebar-menu li a:hover {
-  background: var(--card-bg);
-  color: var(--text-main);
-  transform: translateX(5px);
+.sidebar-icon {
+  font-size: 20px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.sidebar-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}
+
+.sidebar.collapsed .sidebar-menu li a {
+  justify-content: center;
+  padding: 12px;
+}
+
+.sidebar.collapsed .sidebar-icon {
+  margin-right: 0;
+}
+
+.sidebar.collapsed .sidebar-text {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-header h3 {
+  display: none;
+}
+
+.sidebar.collapsed .logout-button {
+  justify-content: center;
+  padding: 12px;
+}
+
+.sidebar.collapsed .logout-button .sidebar-text {
+  display: none;
+}
+
+.sidebar.collapsed .toggle-btn {
+  padding: 8px;
+  font-size: 14px;
 }
 
 .logout-button {
@@ -58,12 +116,15 @@
   background: var(--btn-danger);
   color: var(--text-main);
   border: none;
-  padding: 12px;
+  padding: 12px 15px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
   transition: background-color 0.3s;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .logout-button:hover {
