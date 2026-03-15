@@ -45,10 +45,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
-    setUser(null);
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser);
   };
 
   const registerStudent = async (data) => {
@@ -69,8 +67,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('token');
+    delete axios.defaults.headers.common['Authorization'];
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, registerStudent, registerLecturer, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, registerStudent, registerLecturer, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

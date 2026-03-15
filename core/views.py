@@ -1,5 +1,7 @@
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
+from django.db import models
+from django.db.models import Exists, OuterRef
 # Endpoint to create administrator accounts (Exam Officer, Dean, HOD)
 from django.contrib.auth import get_user_model
 @api_view(['POST'])
@@ -7,17 +9,17 @@ from django.contrib.auth import get_user_model
 def create_admin_account(request):
     """Create Exam Officer, Dean, or HOD account by University ICT Admin"""
     data = request.data
-    required_fields = ['first_name', 'last_name', 'email', 'role', 'password']
+    required_fields = ['first_name', 'last_name', 'email', 'username', 'role', 'password']
     for field in required_fields:
         if not data.get(field):
             return Response({"detail": f"{field} is required."}, status=400)
 
     User = get_user_model()
-    if User.objects.filter(email=data['email']).exists():
-        return Response({"detail": "Email already exists."}, status=400)
+    if User.objects.filter(username=data['username']).exists():
+        return Response({"detail": "Username already exists."}, status=400)
 
     user = User.objects.create_user(
-        username=data['email'],
+        username=data['username'],
         email=data['email'],
         first_name=data['first_name'],
         last_name=data['last_name'],
@@ -37,22 +39,19 @@ def create_admin_account(request):
     if not role_obj:
         return Response({"detail": "Invalid role."}, status=400)
 
-    university_admin = getattr(request.user, 'universityadmin', None)
+    university_admin = request.user.universityadmin_set.first()
     if not university_admin:
         return Response({"detail": "Only University ICT Admin can create admin accounts."}, status=403)
     university = university_admin.university
 
+    # Department and faculty association are optional at creation time.
+    # Assignments can be made later via the department/faculty management workflows.
     faculty = None
     department = None
-    if 'faculty' in data and data['faculty']:
+    if data.get('faculty'):
         faculty = Faculty.objects.filter(name__iexact=data['faculty'], university=university).first()
-        if not faculty and role_obj.name == 'Dean':
-            return Response({"detail": "Faculty not found."}, status=400)
-    if 'department' in data and data['department']:
+    if data.get('department'):
         department = Department.objects.filter(name__iexact=data['department'], faculty__university=university).first()
-        if not department and role_obj.name in ['Head of Department', 'Exam Officer']:
-            return Response({"detail": "Department not found."}, status=400)
-
     UserProfile.objects.create(
         user=user,
         university=university,
@@ -696,12 +695,13 @@ def pending_approvals(request):
         # Get results that are submitted but not approved
         pending_results = ResultSubmission.objects.filter(
             course_assignment__course__department__faculty__university=university
+        ).filter(
+            resultverification__isnull=False
         ).exclude(
-            resultverification__result_approval__isnull=False
+            Exists(ResultApproval.objects.filter(result_verification=OuterRef('resultverification')))
         ).select_related(
             'course_assignment__course',
-            'course_assignment__lecturer',
-            'submitted_by'
+            'submitted_by__user'
         )[:10]
 
         pending_data = []
@@ -709,7 +709,7 @@ def pending_approvals(request):
             pending_data.append({
                 'id': submission.id,
                 'course': f"{submission.course_assignment.course.code} - {submission.course_assignment.course.name}",
-                'lecturer': f"{submission.submitted_by.first_name} {submission.submitted_by.last_name}",
+                'lecturer': f"{submission.submitted_by.user.first_name} {submission.submitted_by.user.last_name}",
                 'submitted_at': submission.submitted_at,
                 'department': submission.course_assignment.course.department.name
             })
@@ -839,5 +839,407 @@ def upcoming_events(request):
 
     except UniversityAdmin.DoesNotExist:
         return Response({'error': 'University admin not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+# Student-specific endpoints
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def student_notifications(request):
+    """Get notifications for the current student"""
+    try:
+        # Get student profile
+        student = Student.objects.get(user=request.user)
+        
+        # Get notifications for this student
+        notifications = Notification.objects.filter(
+            university=student.university
+        ).filter(
+            models.Q(recipient_type='all') |
+            models.Q(recipient_type='students') |
+            models.Q(recipient_user=request.user) |
+            models.Q(recipient_department=student.department) |
+            models.Q(recipient_faculty=student.faculty)
+        ).order_by('-created_at')
+        
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data)
+    
+    except Student.DoesNotExist:
+        return Response({'error': 'Student profile not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def dean_overview(request):
+    """Get academic overview for the dean's faculty"""
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        faculty = profile.faculty
+        if not faculty:
+            return Response({'error': 'Faculty not found for user profile'}, status=404)
+
+        departments = Department.objects.filter(faculty=faculty)
+        courses = Course.objects.filter(department__faculty=faculty)
+        lecturers = Lecturer.objects.filter(faculty=faculty, is_active=True)
+        students = Student.objects.filter(faculty=faculty, is_active=True)
+
+        # Pending result submissions (not yet verified)
+        pending_submissions = ResultSubmission.objects.filter(
+            course_assignment__course__department__faculty=faculty
+        ).exclude(
+            resultverification__isnull=False
+        ).count()
+
+        # Pending approvals (verified but not approved)
+        pending_approvals = ResultVerification.objects.filter(
+            result_submission__course_assignment__course__department__faculty=faculty
+        ).exclude(
+            result_approval__isnull=False
+        ).count()
+
+        return Response({
+            'faculty': {
+                'id': faculty.id,
+                'name': faculty.name,
+            },
+            'stats': {
+                'departments': departments.count(),
+                'courses': courses.count(),
+                'lecturers': lecturers.count(),
+                'students': students.count(),
+                'pending_submissions': pending_submissions,
+                'pending_approvals': pending_approvals,
+            }
+        })
+
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'User profile not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def dean_departments(request):
+    """List departments for the dean's faculty"""
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        faculty = profile.faculty
+        if not faculty:
+            return Response({'error': 'Faculty not found for user profile'}, status=404)
+
+        departments = Department.objects.filter(faculty=faculty)
+        department_data = []
+        for dept in departments:
+            department_data.append({
+                'id': dept.id,
+                'name': dept.name,
+                'courses': Course.objects.filter(department=dept).count(),
+                'lecturers': Lecturer.objects.filter(department=dept, is_active=True).count(),
+                'students': Student.objects.filter(department=dept, is_active=True).count(),
+            })
+
+        return Response(department_data)
+
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'User profile not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def dean_course_assignments(request):
+    """List course assignments for the dean's faculty"""
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        faculty = profile.faculty
+        if not faculty:
+            return Response({'error': 'Faculty not found for user profile'}, status=404)
+
+        assignments = CourseAssignment.objects.filter(
+            course__department__faculty=faculty
+        ).select_related('course', 'lecturer', 'semester')
+
+        data = []
+        for assignment in assignments:
+            data.append({
+                'id': assignment.id,
+                'course_code': assignment.course.code,
+                'course_name': assignment.course.name,
+                'credits': assignment.course.credits,
+                'lecturer': f"{assignment.lecturer.first_name} {assignment.lecturer.last_name}",
+                'semester': assignment.semester.name if assignment.semester else None,
+            })
+
+        return Response(data)
+
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'User profile not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def dean_lecturer_activities(request):
+    """Get recent activity logs for lecturers in the dean's faculty"""
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        faculty = profile.faculty
+        if not faculty:
+            return Response({'error': 'Faculty not found for user profile'}, status=404)
+
+        activities = ActivityLog.objects.filter(
+            university=faculty.university,
+            user__userprofile__faculty=faculty
+        ).order_by('-timestamp')[:20]
+
+        data = []
+        for act in activities:
+            data.append({
+                'id': act.id,
+                'timestamp': act.timestamp,
+                'user': act.user.username if act.user else 'System',
+                'activity': act.activity,
+                'details': act.details
+            })
+
+        return Response(data)
+
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'User profile not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def dean_review_results(request):
+    """List result submissions pending verification"""
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        faculty = profile.faculty
+        if not faculty:
+            return Response({'error': 'Faculty not found for user profile'}, status=404)
+
+        submissions = ResultSubmission.objects.filter(
+            course_assignment__course__department__faculty=faculty
+        ).exclude(
+            resultverification__isnull=False
+        ).select_related('course_assignment__course', 'submitted_by')
+
+        data = []
+        for submission in submissions:
+            data.append({
+                'id': submission.id,
+                'course': f"{submission.course_assignment.course.code} - {submission.course_assignment.course.name}",
+                'submitted_by': f"{submission.submitted_by.first_name} {submission.submitted_by.last_name}",
+                'submitted_at': submission.submitted_at,
+            })
+
+        return Response(data)
+
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'User profile not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def dean_approve_results(request):
+    """List verified results pending approval"""
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        faculty = profile.faculty
+        if not faculty:
+            return Response({'error': 'Faculty not found for user profile'}, status=404)
+
+        verifications = ResultVerification.objects.filter(
+            result_submission__course_assignment__course__department__faculty=faculty
+        ).exclude(
+            result_approval__isnull=False
+        ).select_related('result_submission__course_assignment__course', 'verified_by')
+
+        data = []
+        for verification in verifications:
+            submission = verification.result_submission
+            course = submission.course_assignment.course
+            data.append({
+                'id': verification.id,
+                'course': f"{course.code} - {course.name}",
+                'verified_by': f"{verification.verified_by.user.first_name} {verification.verified_by.user.last_name}",
+                'verified_at': verification.verified_at,
+                'submission_id': submission.id
+            })
+
+        return Response(data)
+
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'User profile not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def dean_approve_submission(request, submission_id):
+    """Approve a verified submission"""
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        verification = ResultVerification.objects.get(result_submission__id=submission_id)
+
+        # Ensure this verification is for the dean's faculty
+        if verification.result_submission.course_assignment.course.department.faculty != profile.faculty:
+            return Response({'error': 'Not authorized to approve this submission'}, status=403)
+
+        ResultApproval.objects.create(
+            result_verification=verification,
+            approved_by=profile
+        )
+
+        return Response({'success': True})
+
+    except ResultVerification.DoesNotExist:
+        return Response({'error': 'Verification not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def dean_return_submission(request, submission_id):
+    """Mark a submission as returned for correction"""
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        submission = ResultSubmission.objects.get(id=submission_id)
+
+        if submission.course_assignment.course.department.faculty != profile.faculty:
+            return Response({'error': 'Not authorized to return this submission'}, status=403)
+
+        # In absence of a dedicated return model, we log it and return success.
+        ActivityLog.objects.create(
+            user=request.user,
+            activity='Returned result submission',
+            details=f'Returned submission {submission.id} for correction',
+            university=profile.university
+        )
+
+        return Response({'success': True})
+
+    except ResultSubmission.DoesNotExist:
+        return Response({'error': 'Submission not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def dean_reports(request):
+    """Get faculty reports and analytics for the dean"""
+    try:
+        profile = UserProfile.objects.get(user=request.user)
+        faculty = profile.faculty
+        if not faculty:
+            return Response({'error': 'Faculty not found for user profile'}, status=404)
+
+        # Faculty statistics
+        departments = Department.objects.filter(faculty=faculty)
+        courses = Course.objects.filter(department__faculty=faculty)
+        lecturers = Lecturer.objects.filter(faculty=faculty, is_active=True)
+        students = Student.objects.filter(faculty=faculty, is_active=True)
+
+        # Result statistics
+        results = Result.objects.filter(
+            course_registration__course_assignment__course__department__faculty=faculty
+        )
+        total_results = results.count()
+        passed_results = results.filter(grade__in=['A', 'B', 'C', 'D']).count()
+        pass_rate = (passed_results / total_results * 100) if total_results > 0 else 0
+
+        # Submission statistics
+        submissions = ResultSubmission.objects.filter(
+            course_assignment__course__department__faculty=faculty
+        )
+        total_submissions = submissions.count()
+        verified_submissions = submissions.filter(resultverification__isnull=False).count()
+        approved_submissions = submissions.filter(
+            resultverification__result_approval__isnull=False
+        ).count()
+
+        # Department performance
+        department_performance = []
+        for dept in departments:
+            dept_results = Result.objects.filter(
+                course_registration__course_assignment__course__department=dept
+            )
+            dept_total = dept_results.count()
+            dept_passed = dept_results.filter(grade__in=['A', 'B', 'C', 'D']).count()
+            dept_pass_rate = (dept_passed / dept_total * 100) if dept_total > 0 else 0
+
+            department_performance.append({
+                'name': dept.name,
+                'students': Student.objects.filter(department=dept, is_active=True).count(),
+                'courses': Course.objects.filter(department=dept).count(),
+                'results': dept_total,
+                'pass_rate': round(dept_pass_rate, 2)
+            })
+
+        return Response({
+            'faculty_overview': {
+                'name': faculty.name,
+                'departments': departments.count(),
+                'courses': courses.count(),
+                'lecturers': lecturers.count(),
+                'students': students.count(),
+            },
+            'result_statistics': {
+                'total_results': total_results,
+                'passed_results': passed_results,
+                'pass_rate': round(pass_rate, 2),
+            },
+            'submission_statistics': {
+                'total_submissions': total_submissions,
+                'verified_submissions': verified_submissions,
+                'approved_submissions': approved_submissions,
+            },
+            'department_performance': department_performance,
+        })
+
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'User profile not found'}, status=404)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def student_academic_progress(request):
+    """Get academic progress for the current student"""
+    try:
+        student = Student.objects.get(user=request.user)
+        
+        # Calculate completed credits
+        completed_results = Result.objects.filter(
+            course_registration__student=student,
+            grade__isnull=False
+        ).exclude(grade='')
+        
+        completed_credits = 0
+        for result in completed_results:
+            course = result.course_registration.course_assignment.course
+            if result.grade and result.grade not in ['F', 'FF']:
+                completed_credits += course.credits
+        
+        # Get program total credits (assuming 120 for now)
+        total_credits = student.program.duration_years * 30  # Rough estimate
+        
+        # Current level
+        current_level = student.level
+        
+        progress_data = {
+            'completedCredits': completed_credits,
+            'totalCredits': total_credits,
+            'currentLevel': current_level,
+            'progressPercentage': (completed_credits / total_credits) * 100 if total_credits > 0 else 0
+        }
+        
+        return Response(progress_data)
+    
+    except Student.DoesNotExist:
+        return Response({'error': 'Student profile not found'}, status=404)
     except Exception as e:
         return Response({'error': str(e)}, status=500)

@@ -6,10 +6,9 @@ import './Management.css';
 const initialState = {
   first_name: '',
   last_name: '',
+  username: '',
   email: '',
   role: '',
-  department: '',
-  faculty: '',
   staff_id: '',
   password: '',
 };
@@ -55,40 +54,105 @@ const AdminAccountCreation = () => {
         </div>
         <form className="admin-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>First Name</label>
-            <input name="first_name" value={form.first_name} onChange={handleChange} required />
-          </div>
-          <div className="form-group">
-            <label>Last Name</label>
-            <input name="last_name" value={form.last_name} onChange={handleChange} required />
-          </div>
-          <div className="form-group">
-            <label>Email</label>
-            <input name="email" type="email" value={form.email} onChange={handleChange} required />
-          </div>
-          <div className="form-group">
             <label>Role</label>
             <select name="role" value={form.role} onChange={handleChange} required>
               <option value="">Select Role</option>
               {roles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
             </select>
           </div>
-          <div className="form-group">
-            <label>Faculty</label>
-            <input name="faculty" value={form.faculty} onChange={handleChange} placeholder="Faculty (for Dean)" />
-          </div>
-          <div className="form-group">
-            <label>Department</label>
-            <input name="department" value={form.department} onChange={handleChange} placeholder="Department (for HOD/Exam Officer)" />
-          </div>
-          <div className="form-group">
-            <label>Staff ID</label>
-            <input name="staff_id" value={form.staff_id} onChange={handleChange} />
-          </div>
-          <div className="form-group">
-            <label>Password</label>
-            <input name="password" type="password" value={form.password} onChange={handleChange} required />
-          </div>
+
+
+          {/* Exam Officer Fields */}
+          {form.role === 'exam_officer' && (
+            <>
+              <div className="form-group">
+                <label>First Name</label>
+                <input name="first_name" value={form.first_name} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Last Name</label>
+                <input name="last_name" value={form.last_name} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Username</label>
+                <input name="username" value={form.username} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Email</label>
+                <input name="email" type="email" value={form.email} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Staff ID</label>
+                <input name="staff_id" value={form.staff_id} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Password</label>
+                <input name="password" type="password" value={form.password} onChange={handleChange} required />
+              </div>
+            </>
+          )}
+
+
+          {/* HOD Fields */}
+          {form.role === 'hod' && (
+            <>
+              <div className="form-group">
+                <label>First Name</label>
+                <input name="first_name" value={form.first_name} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Last Name</label>
+                <input name="last_name" value={form.last_name} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Email</label>
+                <input name="email" type="email" value={form.email} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Username</label>
+                <input name="username" value={form.username} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Password</label>
+                <input name="password" type="password" value={form.password} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Staff ID</label>
+                <input name="staff_id" value={form.staff_id} onChange={handleChange} required />
+              </div>
+            </>
+          )}
+
+
+          {/* Dean Fields */}
+          {form.role === 'dean' && (
+            <>
+              <div className="form-group">
+                <label>First Name</label>
+                <input name="first_name" value={form.first_name} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Last Name</label>
+                <input name="last_name" value={form.last_name} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Email</label>
+                <input name="email" type="email" value={form.email} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Username</label>
+                <input name="username" value={form.username} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Password</label>
+                <input name="password" type="password" value={form.password} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Staff ID</label>
+                <input name="staff_id" value={form.staff_id} onChange={handleChange} required />
+              </div>
+            </>
+          )}
           <div className="form-actions">
             <button className="btn-edit" style={{background:'var(--btn-primary)',color:'white'}} type="submit" disabled={loading}>{loading ? 'Creating...' : 'Create Account'}</button>
           </div>

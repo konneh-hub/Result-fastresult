@@ -11,7 +11,11 @@ from .views import (
     bulk_upload_students, bulk_upload_lecturers, assign_user_role, user_management_list, reports_analytics,
     dashboard_stats, student_enrollment_chart, recent_activities,
     pending_approvals, department_overview, upcoming_events,
-    deactivate_user, activate_user, create_admin_account
+    deactivate_user, activate_user, create_admin_account,
+    student_notifications, student_academic_progress,
+    dean_overview, dean_departments, dean_course_assignments,
+    dean_lecturer_activities, dean_review_results, dean_approve_results,
+    dean_approve_submission, dean_return_submission, dean_reports
 )
 
 router = DefaultRouter()
@@ -60,5 +64,17 @@ urlpatterns = [
     path('dashboard/pending-approvals/', pending_approvals, name='pending_approvals'),
     path('dashboard/department-overview/', department_overview, name='department_overview'),
     path('dashboard/upcoming-events/', upcoming_events, name='upcoming_events'),
+    # Student endpoints
+    path('auth/notifications/', student_notifications, name='student_notifications'),
+    path('auth/academic-progress/', student_academic_progress, name='student_academic_progress'),
+    # Dean endpoints
+    path('dean/overview/', dean_overview, name='dean_overview'),
+    path('dean/departments/', dean_departments, name='dean_departments'),
+    path('dean/course-assignments/', dean_course_assignments, name='dean_course_assignments'),
+    path('dean/lecturer-activities/', dean_lecturer_activities, name='dean_lecturer_activities'),
+    path('dean/results/review/', dean_review_results, name='dean_review_results'),
+    path('dean/results/approve/', dean_approve_results, name='dean_approve_results'),
+    path('dean/results/<int:submission_id>/approve/', dean_approve_submission, name='dean_approve_submission'),
+    path('dean/results/<int:submission_id>/return/', dean_return_submission, name='dean_return_submission'),
     path('api/', include(router.urls)),
 ]

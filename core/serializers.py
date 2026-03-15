@@ -34,6 +34,8 @@ class UserSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()
     university = serializers.SerializerMethodField()
     university_name = serializers.SerializerMethodField()
+    faculty = serializers.SerializerMethodField()
+    department = serializers.SerializerMethodField()
 
     def get_role(self, obj):
         try:
@@ -56,9 +58,26 @@ class UserSerializer(serializers.ModelSerializer):
         except UserProfile.DoesNotExist:
             return None
 
+    def get_faculty(self, obj):
+        try:
+            profile = UserProfile.objects.get(user=obj)
+            return profile.faculty.id if profile.faculty else None
+        except UserProfile.DoesNotExist:
+            return None
+
+    def get_department(self, obj):
+        try:
+            profile = UserProfile.objects.get(user=obj)
+            return profile.department.id if profile.department else None
+        except UserProfile.DoesNotExist:
+            return None
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'date_joined', 'role', 'university', 'university_name')
+        fields = (
+            'id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'date_joined',
+            'role', 'university', 'university_name', 'faculty', 'department'
+        )
         read_only_fields = ('id', 'date_joined')
 
 class LoginSerializer(serializers.Serializer):

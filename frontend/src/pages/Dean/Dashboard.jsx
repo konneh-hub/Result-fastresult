@@ -1,27 +1,85 @@
-import React, { useEffect, useState, useContext } from 'react';
-import AuthContext from '../../contexts/AuthContext';
+import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 
 const Dashboard = () => {
-  const { user } = useContext(AuthContext);
-  const [results, setResults] = useState([]);
+  const [overview, setOverview] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    api.getFacultyResults(user.faculty_id).then(response => setResults(response.data));
-  }, [user]);
+    const fetchOverview = async () => {
+      try {
+        const response = await api.get('/dean/overview/');
+        setOverview(response.data);
+      } catch (err) {
+        console.error('Error loading dean overview:', err);
+        setError('Failed to load overview');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOverview();
+  }, []);
+
+  if (loading) {
+    return <div className="loading">Loading dashboard...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
 
   return (
     <div className="dashboard">
       <h1>Dean Dashboard</h1>
-      <div className="stats">
-        <div>Pending Results: {results.filter(r => r.status === 'pending').length}</div>
-      </div>
-      <nav>
+
+      {overview && (
+        <div className="stats">
+          <div className="stat-card">
+            <h3>Faculty</h3>
+            <p>{overview.faculty?.name}</p>
+          </div>
+          <div className="stat-card">
+            <h3>Departments</h3>
+            <p>{overview.stats.departments}</p>
+          </div>
+          <div className="stat-card">
+            <h3>Courses</h3>
+            <p>{overview.stats.courses}</p>
+          </div>
+          <div className="stat-card">
+            <h3>Lecturers</h3>
+            <p>{overview.stats.lecturers}</p>
+          </div>
+          <div className="stat-card">
+            <h3>Students</h3>
+            <p>{overview.stats.students}</p>
+          </div>
+          <div className="stat-card">
+            <h3>Pending Submissions</h3>
+            <p>{overview.stats.pending_submissions}</p>
+          </div>
+          <div className="stat-card">
+            <h3>Pending Approvals</h3>
+            <p>{overview.stats.pending_approvals}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="dashboard-nav">
+        <h2>Quick Links</h2>
         <ul>
-          <li><a href="/dean/faculty-results">Faculty Results</a></li>
-          <li><a href="/dean/approve-results">Approve Faculty Results</a></li>
+          <li><a href="/dean/departments">Departments</a></li>
+          <li><a href="/dean/course-assignments">Course Assignments</a></li>
+          <li><a href="/dean/review-results">Review Results</a></li>
+          <li><a href="/dean/approve-results">Approve Results</a></li>
+          <li><a href="/dean/return-results">Return Results</a></li>
+          <li><a href="/dean/lecturer-activities">Lecturer Activities</a></li>
+          <li><a href="/dean/profile">Profile Settings</a></li>
+          <li><a href="/dean/change-password">Change Password</a></li>
         </ul>
-      </nav>
+      </div>
     </div>
   );
 };
