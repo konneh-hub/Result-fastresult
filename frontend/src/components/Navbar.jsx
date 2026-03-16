@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../contexts/AuthContext';
+import ThemeSwitcher from './ThemeSwitcher';
 
 const normalizeRole = (role) => (role || '').toString().trim().toLowerCase();
 
@@ -33,20 +34,25 @@ const Navbar = () => {
       <div className="navbar-brand">
         <Link to="/">SRMS</Link>
       </div>
-      <ul className="navbar-nav">
-        <li><Link to="/">Home</Link></li>
-        <li><Link to="/about">About</Link></li>
-        <li><Link to="/universities">Universities</Link></li>
-        <li><Link to="/contact">Contact</Link></li>
-        {user ? (
-          <>
-            {rolePath && <li><Link to={`/${rolePath}/dashboard`}>Dashboard</Link></li>}
-            <li><button onClick={handleLogout}>Logout</button></li>
-          </>
-        ) : (
-          <li><Link to="/login">Login</Link></li>
-        )}
-      </ul>
+
+      <div className="nav-right">
+        <ul className="navbar-nav">
+          <li><Link to="/">Home</Link></li>
+          <li><Link to="/about">About</Link></li>
+          <li><Link to="/universities">Universities</Link></li>
+          <li><Link to="/contact">Contact</Link></li>
+          {user ? (
+            <>
+              {rolePath && <li><Link to={`/${rolePath}/dashboard`}>Dashboard</Link></li>}
+              <li><button className="nav-button" onClick={handleLogout}>Logout</button></li>
+            </>
+          ) : (
+            <li><Link to="/login">Login</Link></li>
+          )}
+        </ul>
+
+        <ThemeSwitcher />
+      </div>
     </nav>
   );
 };

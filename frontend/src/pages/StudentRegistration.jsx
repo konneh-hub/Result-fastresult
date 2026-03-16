@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import AuthContext from '../contexts/AuthContext';
 
 const StudentRegistration = () => {
@@ -33,8 +33,8 @@ const StudentRegistration = () => {
 
   return (
     <div className="registration">
-      <h1>Student Registration</h1>
       <form onSubmit={handleSubmit}>
+        <h1>Student Registration</h1>
         <input name="student_id" placeholder="Student ID" onChange={handleChange} required />
         <input name="first_name" placeholder="First Name" onChange={handleChange} required />
         <input name="last_name" placeholder="Last Name" onChange={handleChange} required />
@@ -45,6 +45,16 @@ const StudentRegistration = () => {
         <input name="department" placeholder="Department" onChange={handleChange} required />
         <input name="program" placeholder="Program" onChange={handleChange} required />
         <button type="submit">Register</button>
+        <div className="form-divider" />
+        <div className="registration-meta">
+          <div className="alt-card">
+            <p>Already have an account?</p>
+            <div className="alt-actions">
+              <Link to="/login" className="btn-link">Login</Link>
+              <Link to="/register/lecturer" className="btn-link">Register as Lecturer</Link>
+            </div>
+          </div>
+        </div>
       </form>
     </div>
   );

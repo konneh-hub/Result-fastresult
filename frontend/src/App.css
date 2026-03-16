@@ -1,27 +1,68 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Main System Colors */
+  /* Light (default) theme colors */
+  --bg-color: #ffffff;
+  --sidebar-color: #f4f6f8;
+  --card-bg: #ffffff;
+  --topbar-color: #f0f3f6;
+  --border-color: #e6eef8;
+
+  /* Dashboard Highlight Colors */
+  --students-color: #2563eb;
+  --results-color: #059669;
+  --courses-color: #f59e0b;
+  --lecturers-color: #ef4444;
+  --gpa-color: #7c3aed;
+
+  /* Text Colors */
+  --text-main: #0f1724;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-link: #2563eb;
+
+  /* Button Colors */
+  --btn-primary: #2563eb;
+  --btn-primary-hover: #1e40af;
+  --btn-success: #059669;
+  --btn-success-hover: #047857;
+  --btn-warning: #f59e0b;
+  --btn-warning-hover: #d97706;
+  --btn-danger: #ef4444;
+  --btn-danger-hover: #dc2626;
+
+  /* Table Colors */
+  --table-bg: #ffffff;
+  --table-header: #f0f3f6;
+  --table-row-hover: #eef3fb;
+  --table-border: #e6eef8;
+
+  /* Login Colors */
+  --login-bg: #f6f9fb;
+  --login-card: #ffffff;
+  --input-bg: #ffffff;
+  --input-border: #e6eef8;
+}
+
+/* Dark theme overrides - applied when `dark-theme` class is present on <html> */
+.dark-theme {
   --bg-color: #0F1C2E;
   --sidebar-color: #0B1626;
   --card-bg: #16263D;
   --topbar-color: #1E2D44;
   --border-color: #223554;
 
-  /* Dashboard Highlight Colors */
   --students-color: #4DA3FF;
   --results-color: #00D9A5;
   --courses-color: #FFB84D;
   --lecturers-color: #FF6B6B;
   --gpa-color: #8B7CFF;
 
-  /* Text Colors */
   --text-main: #FFFFFF;
   --text-secondary: #9ECBFF;
   --text-muted: #8FA4C4;
   --text-link: #4DA3FF;
 
-  /* Button Colors */
   --btn-primary: #4DA3FF;
   --btn-primary-hover: #2E8AE6;
   --btn-success: #00D9A5;
@@ -31,13 +72,11 @@
   --btn-danger: #FF6B6B;
   --btn-danger-hover: #E04B4B;
 
-  /* Table Colors */
   --table-bg: #16263D;
   --table-header: #1E2D44;
   --table-row-hover: #223554;
   --table-border: #2A3F63;
 
-  /* Login Colors */
   --login-bg: #0F1C2E;
   --login-card: #16263D;
   --input-bg: #1E2D44;
@@ -55,6 +94,18 @@ body {
   background-color: var(--bg-color);
   color: var(--text-main);
   line-height: 1.6;
+}
+
+/* Ensure there is no visible line around the site container */
+html, body, #root {
+  border: none;
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: none;
 }
 
 .App {
@@ -78,11 +129,31 @@ main {
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .navbar-brand a {
   color: var(--text-main);
   text-decoration: none;
   font-size: 1.2rem;
   font-weight: 700;
+}
+
+.theme-switcher {
+  margin-left: 0.6rem;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.theme-switcher:hover {
+  background: var(--topbar-color);
 }
 
 .navbar-nav {
@@ -96,11 +167,46 @@ main {
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 5px;
-  transition: background-color 0.3s;
+  transition: color 0.15s ease, background-color 0.15s ease;
 }
 
 .navbar-nav li a:hover {
-  background-color: var(--card-bg);
+  color: var(--btn-primary);
+  background-color: transparent;
+}
+
+.navbar-nav li .nav-button {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.navbar-nav li .nav-button:hover {
+  color: var(--btn-primary);
+  background-color: transparent;
+}
+
+/* Dark-theme: make nav hover/active white for better contrast */
+.dark-theme .navbar-nav li a:hover,
+.dark-theme .navbar-nav li a:active,
+.dark-theme .navbar-nav li a:focus,
+.dark-theme .navbar-nav li .nav-button:hover,
+.dark-theme .navbar-nav li .nav-button:active,
+.dark-theme .navbar-nav li .nav-button:focus {
+  color: var(--text-main);
+  background-color: transparent;
+}
+
+/* Also support an explicit .active class on links */
+.navbar-nav li a.active,
+.navbar-nav li a.active:hover {
+  color: var(--btn-primary);
+}
+.dark-theme .navbar-nav li a.active,
+.dark-theme .navbar-nav li a.active:hover {
   color: var(--text-main);
 }
 
@@ -108,8 +214,136 @@ main {
 .footer {
   background-color: var(--sidebar-color);
   text-align: center;
-  padding: 1rem;
+  padding: 1.25rem 0.75rem;
   color: var(--text-muted);
+}
+
+/* Rich footer layout */
+.footer {
+  background-color: var(--sidebar-color);
+  color: var(--text-muted);
+  padding: 1.5rem 1rem;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.footer-section h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-main);
+  font-size: 1rem;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 0.45rem;
+}
+
+.footer-section ul li a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.footer-section ul li a:hover {
+  color: var(--btn-primary);
+}
+
+.contact-info p {
+  margin: 0.25rem 0;
+  color: var(--text-secondary);
+}
+
+.side-note {
+  text-align: right;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* Footer columns layout */
+.footer-pro .footer-left,
+.footer-pro .footer-center,
+.footer-pro .footer-right {
+  flex: 1 1 0;
+}
+.footer-pro .footer-left ul,
+.footer-pro .footer-center ul {
+  padding-left: 0;
+}
+.footer-pro .copyright {
+  margin-top: 0.6rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 720px) {
+  .footer-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .footer-pro .footer-left,
+  .footer-pro .footer-center,
+  .footer-pro .footer-right {
+    width: 100%;
+  }
+}
+
+.newsletter {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.newsletter input {
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-main);
+}
+.newsletter button {
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  border: none;
+  background: var(--btn-primary);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.socials {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.socials a {
+  font-size: 1.15rem;
+  text-decoration: none;
+}
+
+@media (max-width: 720px) {
+  .footer-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .side-note {
+    text-align: center;
+    margin-top: 0.75rem;
+  }
+  .footer-section {
+    width: 100%;
+  }
 }
 
 /* Dashboard */
@@ -213,6 +447,23 @@ nav ul li a:hover {
 .university-card a {
   color: var(--text-link);
   text-decoration: none;
+}
+
+/* Tweak headings inside form cards: smaller and single-line on desktop, responsive on mobile */
+.login form h1,
+.registration form h1 {
+  font-size: 2rem;
+  margin: 0 0 1rem 0;
+  text-align: center;
+  color: var(--text-main);
+}
+
+@media (max-width: 720px) {
+  .login form h1,
+  .registration form h1 {
+    font-size: 1.25rem;
+    text-align: center;
+  }
 }
 
 /* About */
@@ -325,6 +576,73 @@ nav ul li a:hover {
   margin-top: 1rem;
   color: var(--text-link);
   text-decoration: none;
+}
+
+/* Login footer card */
+.login-meta {
+  width: 100%;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.login-meta .text-link {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: var(--text-link);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.alt-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 0.6rem;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.alt-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.alt-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-link {
+  display: inline-block;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid var(--btn-primary);
+  color: var(--btn-primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.btn-link:hover {
+  background-color: var(--btn-primary);
+  color: var(--text-main);
+}
+
+@media (max-width: 720px) {
+  .alt-card {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .alt-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
 }
 
 /* Registration */

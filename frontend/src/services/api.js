@@ -26,7 +26,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Do not force a full-page redirect here; let the app handle unauthenticated state
+      // (e.g., AuthContext or ProtectedRoute can redirect when appropriate).
     }
     return Promise.reject(error);
   }
