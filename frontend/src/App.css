@@ -129,11 +129,103 @@ main {
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
+/* Scrolled state: compact and slightly opaque */
+.navbar.scrolled {
+  background-color: rgba(255,255,255,0.92);
+  padding: 0.45rem 1rem;
+  box-shadow: 0 6px 18px rgba(6, 8, 15, 0.08);
+}
+
 .nav-right {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
+
+/* nav-toggle removed: menu is always visible / stacked on small screens */
+/* Mobile: show a single hamburger toggle and dropdown panel */
+.nav-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.nav-toggle .hamburger,
+.nav-toggle .hamburger::before,
+.nav-toggle .hamburger::after {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text-secondary);
+  border-radius: 2px;
+  position: relative;
+}
+
+.nav-toggle .hamburger::before,
+.nav-toggle .hamburger::after {
+  content: '';
+  position: absolute;
+  left: 0;
+}
+
+.nav-toggle .hamburger::before { top: -7px; }
+.nav-toggle .hamburger::after { top: 7px; }
+
+.nav-toggle.open .hamburger { background: transparent; }
+.nav-toggle.open .hamburger::before { transform: rotate(45deg) translate(4px, 4px); }
+.nav-toggle.open .hamburger::after { transform: rotate(-45deg) translate(4px, -4px); }
+
+/* Desktop: nav visible inline; on small screens hide inline nav and show via toggle */
+@media (max-width: 720px) {
+  .nav-toggle { display: inline-flex; }
+  .navbar-nav { display: none; }
+
+  .navbar-nav.open {
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    color: var(--text-main);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    border-radius: 0 0 10px 10px;
+    padding: 12px 10px;
+    z-index: 40;
+  }
+
+  .navbar-nav.open li { display: block; margin: 6px 8px; }
+
+  .navbar-nav.open li a,
+  .navbar-nav.open li .nav-button {
+    padding: 0.75rem 1rem;
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--text-main);
+  }
+
+  .navbar-nav.open li a:hover,
+  .navbar-nav.open li .nav-button:hover {
+    background: rgba(37,99,235,0.06);
+    color: var(--btn-primary);
+    border-color: rgba(37,99,235,0.12);
+  }
+
+  /* show theme switcher inside nav panel; hide topbar one */
+  .theme-switcher { display: none; }
+  .navbar-nav.open .mobile-theme { display: block; margin: 6px 8px; }
+  .navbar-nav.open .mobile-theme .theme-switcher { display: inline-flex; width: 100%; justify-content: center; }
+
+  .nav-right { align-items: center; }
+}
+
+/* end mobile toggle styles */
 
 .navbar-brand a {
   color: var(--text-main);
@@ -141,6 +233,10 @@ main {
   font-size: 1.2rem;
   font-weight: 700;
 }
+
+/* ensure brand sits left and nav area grows */
+.navbar-brand { display: flex; align-items: center; }
+.nav-right { margin-left: auto; display: flex; align-items: center; }
 
 .theme-switcher {
   margin-left: 0.6rem;
@@ -160,6 +256,13 @@ main {
   display: flex;
   list-style: none;
   gap: 1rem;
+}
+
+/* Desktop specific nav - hide on small screens */
+.desktop-nav { display: flex; }
+
+@media (max-width: 860px) {
+  .desktop-nav { display: none; }
 }
 
 .navbar-nav li a {
@@ -280,25 +383,6 @@ main {
 .footer-pro .footer-center ul {
   padding-left: 0;
 }
-.footer-pro .copyright {
-  margin-top: 0.6rem;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-}
-
-@media (max-width: 720px) {
-  .footer-inner {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-  .footer-pro .footer-left,
-  .footer-pro .footer-center,
-  .footer-pro .footer-right {
-    width: 100%;
-  }
-}
-
 .newsletter {
   margin-top: 0.75rem;
   display: flex;
@@ -449,6 +533,47 @@ nav ul li a:hover {
   text-decoration: none;
 }
 
+/* Mobile panel and backdrop for slide-out menu */
+.nav-toggle { display: none; }
+
+@media (max-width: 860px) {
+  .nav-toggle { display: inline-flex; }
+}
+
+.mobile-backdrop { display: none; }
+.mobile-backdrop.open {
+  display: block;
+  position: fixed;
+  inset: 0;
+  background: rgba(2,6,23,0.45);
+  z-index: 45;
+}
+
+.mobile-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 0;
+  max-width: 420px;
+  background: var(--card-bg);
+  box-shadow: -18px 0 40px rgba(2,6,23,0.08);
+  z-index: 46;
+  overflow: hidden;
+  transition: width 0.28s ease;
+}
+.mobile-panel.open { width: 80%; }
+
+.mobile-panel-inner { padding: 20px; height: 100%; display: flex; flex-direction: column; }
+.mobile-header { display:flex; justify-content:space-between; align-items:center; }
+.mobile-logo { font-weight:700; color:var(--btn-primary); text-decoration:none; }
+.close-mobile { background:transparent; border:none; font-size:1.25rem; }
+.mobile-nav { margin-top: 18px; display:flex; flex-direction:column; gap:8px; }
+.mobile-link { display:block; padding:12px 8px; color:var(--text-main); text-decoration:none; }
+.mobile-link:hover { color:var(--btn-primary); }
+/* mobile CTA removed */
+
+
 /* Tweak headings inside form cards: smaller and single-line on desktop, responsive on mobile */
 .login form h1,
 .registration form h1 {
@@ -541,13 +666,14 @@ nav ul li a:hover {
 
 .login input {
   width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.75rem;
   background-color: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: 5px;
+  border-radius: 6px;
   color: var(--text-main);
-  font-size: 1rem;
+  font-size: 0.95rem;
+  box-shadow: none;
 }
 
 .login input::placeholder {
@@ -656,28 +782,30 @@ nav ul li a:hover {
 
 .registration form {
   background-color: var(--login-card);
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  padding: 1.25rem;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
   width: 100%;
-  max-width: 500px;
+  max-width: 420px;
 }
 
 .registration h1 {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   color: var(--text-main);
+  font-size: 1.2rem;
 }
 
 .registration input {
   width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.6rem;
   background-color: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: 5px;
+  border-radius: 6px;
   color: var(--text-main);
-  font-size: 1rem;
+  font-size: 0.95rem;
+  box-shadow: none;
 }
 
 .registration input::placeholder {
@@ -700,8 +828,57 @@ nav ul li a:hover {
   background-color: var(--btn-primary-hover);
 }
 
+/* Field error styling */
+.field-error {
+  color: #b91c1c;
+  font-size: 0.9rem;
+  margin-top: -0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* password toggle removed - keep password strength rules if needed */
+
+/* Password strength meter */
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.strength-bar {
+  flex: 1 1 auto;
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.strength-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  background: #fecaca; /* default very weak */
+  transition: width 0.25s ease, background 0.25s ease;
+}
+.strength-bar[data-score='1']::after { width: 20%; background: #fecaca; }
+.strength-bar[data-score='2']::after { width: 40%; background: #fdba74; }
+.strength-bar[data-score='3']::after { width: 60%; background: #fef08a; }
+.strength-bar[data-score='4']::after { width: 80%; background: #bbf7d0; }
+.strength-bar[data-score='5']::after { width: 100%; background: #86efac; }
+
+.strength-text {
+  min-width: 80px;
+  text-align: right;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
 /* Forgot Password */
 .forgot-password {
+
   display: flex;
   justify-content: center;
   align-items: center;
@@ -709,50 +886,88 @@ nav ul li a:hover {
   background-color: var(--login-bg);
 }
 
-.forgot-password form {
-  background-color: var(--login-card);
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+.forgot-layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
-  max-width: 400px;
+  max-width: 900px;
+  padding: 2rem;
 }
 
-.forgot-password h1 {
+.forgot-card {
+  background-color: var(--login-card);
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+  border: 1px solid var(--border-color);
+  width: 100%;
+  max-width: 700px;
   text-align: center;
-  margin-bottom: 1.5rem;
+}
+
+.forgot-card h1 {
+  font-size: 1.75rem;
+  margin: 0 0 0.5rem 0;
   color: var(--text-main);
 }
 
-.forgot-password input {
+.forgot-card .subtitle {
+  color: var(--text-secondary);
+  font-size: 0.98rem;
+  margin: 0 0 1rem 0;
+}
+
+/* Shared auth card used across login/registration/forgot pages */
+.auth-card {
+  background-color: var(--login-card);
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+  border: 1px solid var(--border-color);
   width: 100%;
-  padding: 0.75rem;
+  max-width: 420px;
+}
+
+.card-form .label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.card-form input {
+  width: 100%;
+  padding: 0.85rem;
   margin-bottom: 1rem;
   background-color: var(--input-bg);
   border: 1px solid var(--input-border);
-  border-radius: 5px;
+  border-radius: 8px;
   color: var(--text-main);
   font-size: 1rem;
 }
 
-.forgot-password input::placeholder {
-  color: var(--text-muted);
-}
-
-.forgot-password button {
+.btn-primary {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.9rem;
   background-color: var(--btn-primary);
   color: var(--text-main);
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.2s;
 }
 
-.forgot-password button:hover {
+.btn-primary:hover {
   background-color: var(--btn-primary-hover);
+}
+
+@media (max-width: 900px) {
+  .forgot-layout { padding: 1.5rem; }
+  .forgot-card { max-width: 100%; }
+  .forgot-card h1 { font-size: 1.6rem; text-align: center; }
+  .forgot-card .subtitle { text-align: center; }
 }
 
 /* Buttons */

@@ -12,11 +12,18 @@ const ForgotPassword = () => {
 
   return (
     <div className="forgot-password">
-      <h1>Forgot Password</h1>
-      <form onSubmit={handleSubmit}>
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <button type="submit">Send Reset Email</button>
-      </form>
+      <div className="forgot-layout">
+        <div className="forgot-card">
+          <h1>Forgot Password</h1>
+          <p className="subtitle">Enter your account email and we'll send a password reset link.</p>
+
+          <form onSubmit={handleSubmit} className="card-form">
+            <label className="label">Email address</label>
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <button type="submit" className="btn-primary">Send Reset Email</button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

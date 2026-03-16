@@ -5,6 +5,7 @@ import AuthContext from '../contexts/AuthContext';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [strength, setStrength] = useState({ score: 0, label: '' });
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -40,12 +41,46 @@ const Login = () => {
     }
   };
 
+  const evaluatePassword = (pwd) => {
+    let score = 0;
+    if (!pwd) {
+      setStrength({ score: 0, label: '' });
+      return;
+    }
+    if (pwd.length >= 8) score += 2;
+    else if (pwd.length >= 6) score += 1;
+    if (/[A-Z]/.test(pwd)) score += 1;
+    if (/[0-9]/.test(pwd)) score += 1;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) score += 1;
+
+    let label = 'Very weak';
+    if (score >= 5) label = 'Very strong';
+    else if (score >= 4) label = 'Strong';
+    else if (score >= 3) label = 'Medium';
+    else if (score >= 2) label = 'Weak';
+
+    setStrength({ score, label });
+  };
+
   return (
     <div className="login">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="auth-card card-form">
         <h1>Login</h1>
         <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => { setPassword(e.target.value); evaluatePassword(e.target.value); }}
+          required
+          autoComplete="current-password"
+        />
+
+        <div className="password-strength" aria-hidden={strength.label === ''}>
+          <div className="strength-bar" data-score={strength.score} />
+          <div className="strength-text">{strength.label}</div>
+        </div>
+
         <button type="submit">Login</button>
 
         <div className="form-divider" />
