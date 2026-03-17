@@ -32,8 +32,11 @@ ChartJS.register(
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
   const [stats, setStats] = useState({
-    totals: { students: 0, lecturers: 0, courses: 0, departments: 0 },
-    result_progress: { total: 0, submitted: 0, verified: 0, approved: 0, pending_approvals: 0 }
+    total_students: 0,
+    total_lecturers: 0,
+    total_departments: 0,
+    total_faculties: 0,
+    pending_approvals: 0
   });
   const [enrollmentData, setEnrollmentData] = useState([]);
   const [recentActivities, setRecentActivities] = useState([]);
@@ -105,13 +108,13 @@ const Dashboard = () => {
 
   // Chart data for result submission progress
   const resultProgressData = {
-    labels: ['Total Results', 'Submitted', 'Verified', 'Approved'],
+    labels: ['Total Students', 'Total Lecturers', 'Total Departments', 'Pending Approvals'],
     datasets: [{
       data: [
-        stats.result_progress.total,
-        stats.result_progress.submitted,
-        stats.result_progress.verified,
-        stats.result_progress.approved
+        stats.total_students || 0,
+        stats.total_lecturers || 0,
+        stats.total_departments || 0,
+        stats.pending_approvals || 0
       ],
       backgroundColor: [
         'rgba(255, 99, 132, 0.8)',
@@ -152,19 +155,19 @@ const Dashboard = () => {
         <div className="stats-cards">
           <div className="stat-card">
             <h3>Total Students</h3>
-            <p className="stat-number">{stats.totals.students}</p>
+            <p className="stat-number">{stats.total_students || 0}</p>
           </div>
           <div className="stat-card">
             <h3>Total Lecturers</h3>
-            <p className="stat-number">{stats.totals.lecturers}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Total Courses</h3>
-            <p className="stat-number">{stats.totals.courses}</p>
+            <p className="stat-number">{stats.total_lecturers || 0}</p>
           </div>
           <div className="stat-card">
             <h3>Total Departments</h3>
-            <p className="stat-number">{stats.totals.departments}</p>
+            <p className="stat-number">{stats.total_departments || 0}</p>
+          </div>
+          <div className="stat-card">
+            <h3>Total Faculties</h3>
+            <p className="stat-number">{stats.total_faculties || 0}</p>
           </div>
         </div>
 
