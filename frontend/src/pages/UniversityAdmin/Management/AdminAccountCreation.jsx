@@ -11,6 +11,8 @@ const initialState = {
   role: '',
   staff_id: '',
   password: '',
+  faculty_id: '',
+  department_id: '',
 };
 
 const roles = [
@@ -120,6 +122,14 @@ const AdminAccountCreation = () => {
                 <label>Staff ID</label>
                 <input name="staff_id" value={form.staff_id} onChange={handleChange} required />
               </div>
+              <div className="form-group">
+                <label>Faculty ID</label>
+                <input name="faculty_id" value={form.faculty_id} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Department ID</label>
+                <input name="department_id" value={form.department_id} onChange={handleChange} required />
+              </div>
             </>
           )}
 
@@ -150,6 +160,10 @@ const AdminAccountCreation = () => {
               <div className="form-group">
                 <label>Staff ID</label>
                 <input name="staff_id" value={form.staff_id} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Faculty ID</label>
+                <input name="faculty_id" value={form.faculty_id} onChange={handleChange} required />
               </div>
             </>
           )}

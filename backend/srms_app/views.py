@@ -197,12 +197,12 @@ def create_admin_account(request):
 
         # Add faculty/department relationships based on role
         if data['role'] == 'dean':
-            # For dean, assign to the same faculty as the university admin
-            profile_data['faculty'] = user_profile.faculty
+            # For dean, assign to the specified faculty
+            profile_data['faculty_id'] = data['faculty_id']
         elif data['role'] == 'hod':
-            # For HOD, assign to the same department as the university admin
-            profile_data['faculty'] = user_profile.faculty
-            profile_data['department'] = user_profile.department
+            # For HOD, assign to the specified faculty and department
+            profile_data['faculty_id'] = data['faculty_id']
+            profile_data['department_id'] = data['department_id']
 
         UserProfile.objects.create(**profile_data)
 
@@ -493,21 +493,27 @@ def dashboard_stats(request):
     elif role == 'dean':
         # Stats for Dean dashboard
         faculty = profile.faculty
-        stats = {
-            'total_departments': Department.objects.filter(faculty=faculty).count(),
-            'total_lecturers': Lecturer.objects.filter(faculty=faculty).count(),
-            'total_students': Student.objects.filter(faculty=faculty).count(),
-            'pending_results': ResultSubmission.objects.filter(status='pending', course__department__faculty=faculty).count(),
-        }
+        if not faculty:
+            stats = {'error': 'Faculty not assigned'}
+        else:
+            stats = {
+                'total_departments': Department.objects.filter(faculty=faculty).count(),
+                'total_lecturers': Lecturer.objects.filter(faculty=faculty).count(),
+                'total_students': Student.objects.filter(faculty=faculty).count(),
+                'pending_results': ResultSubmission.objects.filter(status='pending', course__department__faculty=faculty).count(),
+            }
     elif role == 'hod':
         # Stats for HOD dashboard
         department = profile.department
-        stats = {
-            'total_lecturers': Lecturer.objects.filter(department=department).count(),
-            'total_students': Student.objects.filter(department=department).count(),
-            'total_courses': Course.objects.filter(department=department).count(),
-            'pending_results': ResultSubmission.objects.filter(status='pending', course__department=department).count(),
-        }
+        if not department:
+            stats = {'error': 'Department not assigned'}
+        else:
+            stats = {
+                'total_lecturers': Lecturer.objects.filter(department=department).count(),
+                'total_students': Student.objects.filter(department=department).count(),
+                'total_courses': Course.objects.filter(department=department).count(),
+                'pending_results': ResultSubmission.objects.filter(status='pending', course__department=department).count(),
+            }
     elif role == 'exam_officer':
         # Stats for Exam Officer dashboard
         university = profile.university
