@@ -486,7 +486,8 @@ def dashboard_stats(request):
         stats = {
             'total_students': Student.objects.filter(university=university).count(),
             'total_lecturers': Lecturer.objects.filter(university=university).count(),
-            'total_departments': Department.objects.filter(university=university).count(),
+            # Departments are linked to faculties, so filter via Faculty->University
+            'total_departments': Department.objects.filter(faculty__university=university).count(),
             'total_faculties': Faculty.objects.filter(university=university).count(),
             'pending_approvals': University.objects.filter(is_approved=False).count(),  # Assuming system admin approvals
         }
