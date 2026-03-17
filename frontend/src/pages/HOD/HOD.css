@@ -1,0 +1,356 @@
+/* HOD.css with Updated Color Palette */
+
+:root {
+  --primary: #1e3a8a; /* Deep Blue */
+  --secondary: #14b8a6; /* Teal */
+  --accent: #f59e0b; /* Orange */
+  --background: #f8fafc; /* Light Gray */
+  --surface: #ffffff; /* White */
+  --text-primary: #1f2937; /* Dark Gray */
+  --text-secondary: #6b7280; /* Medium Gray */
+  --border: #e5e7eb; /* Light Gray */
+  --success: #10b981; /* Green */
+  --error: #ef4444; /* Red */
+  --warning: #f59e0b; /* Yellow */
+  --btn-primary: #1e3a8a; /* Deep Blue for buttons */
+  --hover: #f1f5f9; /* Light hover background */
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--background);
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 20px;
+  background-color: var(--background);
+}
+
+.management-header {
+  margin-bottom: 20px;
+  background-color: var(--surface);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.management-header h1 {
+  color: var(--primary);
+  margin: 0 0 10px 0;
+}
+
+.management-header p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: var(--surface);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.stat-card h3 {
+  margin: 0 0 10px 0;
+  color: var(--text-secondary);
+}
+
+.stat-card p {
+  font-size: 2em;
+  font-weight: bold;
+  color: var(--primary);
+  margin: 0;
+}
+
+.dashboard-section {
+  background-color: var(--surface);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.dashboard-section h2 {
+  margin-bottom: 15px;
+  color: var(--primary);
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.action-buttons .btn {
+  padding: 10px 15px;
+  background: var(--btn-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s;
+}
+
+.action-buttons .btn:hover {
+  background: var(--secondary);
+}
+
+.pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pending-item {
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background-color: var(--background);
+}
+
+.pending-item p {
+  margin: 0 0 5px 0;
+}
+
+.pending-item small {
+  color: var(--text-secondary);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.info-item {
+  padding: 10px;
+  background-color: var(--background);
+  border-radius: 4px;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.results-table th,
+.results-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.results-table th {
+  background: var(--primary);
+  color: white;
+}
+
+.results-table tr:hover {
+  background: var(--hover);
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text-primary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: var(--surface);
+  color: var(--text-primary);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+button[type="submit"],
+.btn {
+  padding: 10px 15px;
+  background: var(--btn-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover,
+.btn:hover {
+  background: var(--secondary);
+}
+
+button[type="submit"]:disabled,
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.success {
+  background: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.alert {
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.alert.warning {
+  background: #fff3cd;
+  border-left-color: var(--warning);
+}
+
+.alert.error {
+  background: #f8d7da;
+  border-left-color: var(--error);
+}
+
+.alert.info {
+  background: #d1ecf1;
+  border-left-color: var(--secondary);
+}
+
+.alert h3 {
+  margin: 0 0 5px 0;
+}
+
+.alert p {
+  margin: 0 0 5px 0;
+}
+
+.alert small {
+  color: var(--text-secondary);
+}
+
+.report-generator {
+  background: var(--surface);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.report-display {
+  background: var(--surface);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.report-display pre {
+  background: var(--background);
+  padding: 15px;
+  border-radius: 4px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+}
+
+.profile-settings {
+  display: flex;
+  gap: 30px;
+  background-color: var(--surface);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.settings-section {
+  flex: 1;
+}
+
+.settings-section h2 {
+  margin-bottom: 15px;
+  color: var(--primary);
+}
+
+.password-form {
+  max-width: 400px;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-settings {
+    flex-direction: column;
+  }
+}
