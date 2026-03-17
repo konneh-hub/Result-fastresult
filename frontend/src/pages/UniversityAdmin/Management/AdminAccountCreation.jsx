@@ -41,7 +41,9 @@ const AdminAccountCreation = () => {
       setSuccess('Administrator account created successfully!');
       setForm(initialState);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to create account.');
+      setError(
+        err.response?.data?.error || err.response?.data?.detail || 'Failed to create account.'
+      );
     } finally {
       setLoading(false);
     }

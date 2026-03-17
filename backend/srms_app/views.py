@@ -171,6 +171,15 @@ def create_admin_account(request):
         if user_profile.role != 'university_admin':
             return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
 
+        role = data.get('role')
+        if role not in ['exam_officer', 'dean', 'hod']:
+            return Response({'error': 'Invalid role'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate required fields
+        for field in ['username', 'email', 'password', 'first_name', 'last_name']:
+            if not data.get(field):
+                return Response({'error': f'Missing required field: {field}'}, status=status.HTTP_400_BAD_REQUEST)
+
         # Check if username already exists
         if User.objects.filter(username=data['username']).exists():
             return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
@@ -192,32 +201,49 @@ def create_admin_account(request):
         profile_data = {
             'user': user,
             'university': user_profile.university,
-            'role': data['role']
+            'role': role
         }
 
         # Add faculty/department relationships based on role
-        if data['role'] == 'dean':
-            # For dean, assign to the specified faculty
-            profile_data['faculty_id'] = data['faculty_id']
-        elif data['role'] == 'hod':
-            # For HOD, assign to the specified faculty and department
-            profile_data['faculty_id'] = data['faculty_id']
-            profile_data['department_id'] = data['department_id']
+        if role == 'dean':
+            faculty_id = data.get('faculty_id')
+            if not faculty_id:
+                return Response({'error': 'Missing required field: faculty_id'}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                Faculty.objects.get(id=faculty_id, university=user_profile.university)
+            except Faculty.DoesNotExist:
+                return Response({'error': 'Invalid faculty_id'}, status=status.HTTP_400_BAD_REQUEST)
+            profile_data['faculty_id'] = faculty_id
+
+        elif role == 'hod':
+            faculty_id = data.get('faculty_id')
+            department_id = data.get('department_id')
+            if not faculty_id or not department_id:
+                return Response({'error': 'Missing required field: faculty_id or department_id'}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                faculty = Faculty.objects.get(id=faculty_id, university=user_profile.university)
+            except Faculty.DoesNotExist:
+                return Response({'error': 'Invalid faculty_id'}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                Department.objects.get(id=department_id, faculty=faculty)
+            except Department.DoesNotExist:
+                return Response({'error': 'Invalid department_id for the selected faculty'}, status=status.HTTP_400_BAD_REQUEST)
+            profile_data['faculty_id'] = faculty_id
+            profile_data['department_id'] = department_id
 
         UserProfile.objects.create(**profile_data)
 
-        # Create role-specific record if needed
-        if data['role'] in ['dean', 'hod', 'exam_officer']:
-            # Create Lecturer record for academic roles
+        # Create role-specific record if needed (only for dean/hod)
+        if role in ['dean', 'hod']:
             Lecturer.objects.create(
                 user=user,
                 employee_id=data.get('staff_id', data['username']),
                 university=user_profile.university,
-                faculty=profile_data.get('faculty'),
-                department=profile_data.get('department')
+                faculty_id=profile_data.get('faculty_id'),
+                department_id=profile_data.get('department_id')
             )
 
-        return Response({'message': f'{data["role"].replace("_", " ").title()} account created successfully'}, status=status.HTTP_201_CREATED)
+        return Response({'message': f'{role.replace("_", " ").title()} account created successfully'}, status=status.HTTP_201_CREATED)
     except Exception as e:
         # Clean up user if creation failed
         if 'user' in locals():
