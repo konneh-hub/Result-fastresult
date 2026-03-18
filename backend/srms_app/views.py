@@ -165,28 +165,56 @@ def register_lecturer(request):
 @permission_classes([IsAuthenticated])
 def create_admin_account(request):
     data = request.data
+    print(f"DEBUG create_admin: data={data}")  # Temporary debug logging
+    
     try:
         # Check if user is university admin
         user_profile = UserProfile.objects.get(user=request.user)
         if user_profile.role != 'university_admin':
-            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'error': 'Only university admins can create admin accounts'}, status=status.HTTP_403_FORBIDDEN)
 
         role = data.get('role')
-        if role not in ['exam_officer', 'dean', 'hod']:
-            return Response({'error': 'Invalid role'}, status=status.HTTP_400_BAD_REQUEST)
+        if not role or role not in ['exam_officer', 'dean', 'hod']:
+            return Response({'error': 'Invalid or missing role. Must be one of: exam_officer, dean, hod'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Validate required fields
-        for field in ['username', 'email', 'password', 'first_name', 'last_name']:
-            if not data.get(field):
+        # Common required fields validation
+        required_common = ['username', 'email', 'password', 'first_name', 'last_name']
+        for field in required_common:
+            if not data.get(field, '').strip():
                 return Response({'error': f'Missing required field: {field}'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if username already exists
+        # Username/Email uniqueness check
         if User.objects.filter(username=data['username']).exists():
-            return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Check if email already exists
+            return Response({'error': f'Username "{data["username"]}" already exists'}, status=status.HTTP_400_BAD_REQUEST)
         if User.objects.filter(email=data['email']).exists():
-            return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': f'Email "{data["email"]}" already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Role-specific validation (faculty/department optional)
+        faculty = None
+        department = None
+
+        if role == 'dean':
+            faculty_id_str = data.get('faculty_id', '')
+            if faculty_id_str:
+                try:
+                    faculty_id = int(faculty_id_str)
+                    faculty = Faculty.objects.get(id=faculty_id, university=user_profile.university)
+                except (ValueError, Faculty.DoesNotExist):
+                    return Response({'error': f'Invalid faculty_id "{faculty_id_str}". Must be a valid faculty ID for your university.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        elif role == 'hod':
+            faculty_id_str = data.get('faculty_id', '')
+            dept_id_str = data.get('department_id', '')
+            if faculty_id_str or dept_id_str:
+                if not faculty_id_str or not dept_id_str:
+                    return Response({'error': 'To set HOD faculty/department, both faculty_id and department_id are required.'}, status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    faculty_id = int(faculty_id_str)
+                    dept_id = int(dept_id_str)
+                    faculty = Faculty.objects.get(id=faculty_id, university=user_profile.university)
+                    department = Department.objects.get(id=dept_id, faculty=faculty)
+                except (ValueError, Faculty.DoesNotExist, Department.DoesNotExist):
+                    return Response({'error': f'Invalid faculty_id "{faculty_id_str}" or department_id "{dept_id_str}". Department must belong to selected faculty.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create User
         user = User.objects.create_user(
@@ -197,58 +225,53 @@ def create_admin_account(request):
             last_name=data['last_name']
         )
 
-        # Create UserProfile with appropriate role
+        # Prepare profile data
         profile_data = {
             'user': user,
             'university': user_profile.university,
             'role': role
         }
 
-        # Add faculty/department relationships based on role
-        if role == 'dean':
-            faculty_id = data.get('faculty_id')
-            if not faculty_id:
-                return Response({'error': 'Missing required field: faculty_id'}, status=status.HTTP_400_BAD_REQUEST)
-            try:
-                Faculty.objects.get(id=faculty_id, university=user_profile.university)
-            except Faculty.DoesNotExist:
-                return Response({'error': 'Invalid faculty_id'}, status=status.HTTP_400_BAD_REQUEST)
-            profile_data['faculty_id'] = faculty_id
+        # Role-specific profile fields
+        if faculty is not None:
+            profile_data['faculty'] = faculty
+        if department is not None:
+            profile_data['department'] = department
 
-        elif role == 'hod':
-            faculty_id = data.get('faculty_id')
-            department_id = data.get('department_id')
-            if not faculty_id or not department_id:
-                return Response({'error': 'Missing required field: faculty_id or department_id'}, status=status.HTTP_400_BAD_REQUEST)
-            try:
-                faculty = Faculty.objects.get(id=faculty_id, university=user_profile.university)
-            except Faculty.DoesNotExist:
-                return Response({'error': 'Invalid faculty_id'}, status=status.HTTP_400_BAD_REQUEST)
-            try:
-                Department.objects.get(id=department_id, faculty=faculty)
-            except Department.DoesNotExist:
-                return Response({'error': 'Invalid department_id for the selected faculty'}, status=status.HTTP_400_BAD_REQUEST)
-            profile_data['faculty_id'] = faculty_id
-            profile_data['department_id'] = department_id
+        # Create UserProfile
+        profile = UserProfile.objects.create(**profile_data)
 
-        UserProfile.objects.create(**profile_data)
-
-        # Create role-specific record if needed (only for dean/hod)
+        # Create Lecturer record for dean/hod
         if role in ['dean', 'hod']:
-            Lecturer.objects.create(
-                user=user,
-                employee_id=data.get('staff_id', data['username']),
-                university=user_profile.university,
-                faculty_id=profile_data.get('faculty_id'),
-                department_id=profile_data.get('department_id')
-            )
+            lecturer_data = {
+                'user': user,
+                'university': user_profile.university,
+                'first_name': data['first_name'],
+                'last_name': data['last_name'],
+                'email': data['email'],
+                'employee_id': data.get('staff_id', data['username']),
+            }
+            if faculty is not None:
+                lecturer_data['faculty'] = faculty
+            if department is not None:
+                lecturer_data['department'] = department
 
-        return Response({'message': f'{role.replace("_", " ").title()} account created successfully'}, status=status.HTTP_201_CREATED)
+            Lecturer.objects.create(**lecturer_data)
+
+        return Response({
+            'message': f'{role.replace("_", " ").title()} account created successfully!',
+            'user_id': user.id,
+            'profile_id': profile.id
+        }, status=status.HTTP_201_CREATED)
+
+    except UserProfile.DoesNotExist:
+        return Response({'error': 'User profile not found. Please contact support.'}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        # Clean up user if creation failed
-        if 'user' in locals():
+        print(f"ERROR create_admin_account: {str(e)}")  # Debug logging
+        # Cleanup on failure
+        if 'user' in locals() and user:
             user.delete()
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': f'Failed to create account: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
 # Universities endpoint
 @api_view(['GET'])
@@ -2402,6 +2425,22 @@ def dean_overview(request):
             return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
 
         faculty = user_profile.faculty
+        if not faculty:
+            # Dean account created without a faculty assigned (optional during creation)
+            # Return a safe empty overview to avoid breaking the dashboard.
+            return Response({
+                'faculty': None,
+                'stats': {
+                    'departments': 0,
+                    'courses': 0,
+                    'lecturers': 0,
+                    'students': 0,
+                    'pending_submissions': 0,
+                    'pending_approvals': 0,
+                },
+                'message': 'No faculty assigned. Please set a faculty for this dean account.'
+            })
+
         stats = {
             'departments': Department.objects.filter(faculty=faculty).count(),
             'courses': Course.objects.filter(department__faculty=faculty).count(),

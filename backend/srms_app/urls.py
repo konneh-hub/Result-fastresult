@@ -105,6 +105,9 @@ urlpatterns = [
 
     path('universities/', universities, name='universities'),
     path('departments/<int:department_id>/', department_overview, name='department-overview'),
+    path('departments/<int:department_id>/lecturers/', department_lecturers, name='department-lecturers'),
+    path('departments/<int:department_id>/students/', department_students, name='department-students'),
+    path('departments/<int:department_id>/courses/', department_courses, name='department-courses'),
     path('dashboard/stats/', dashboard_stats, name='dashboard-stats'),
     path('dashboard/activities/', recent_activities, name='recent-activities'),
     path('dashboard/student-enrollment-chart/', dashboard_student_enrollment_chart, name='dashboard-student-enrollment-chart'),
