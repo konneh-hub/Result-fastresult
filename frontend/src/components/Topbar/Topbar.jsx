@@ -11,8 +11,11 @@ import './Topbar.css';
 const Topbar = () => {
   const { user } = useContext(AuthContext);
   const location = useLocation();
-  const isAdminPage = location.pathname.startsWith('/admin/');
-  const isDashboard = location.pathname === '/admin/dashboard';
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const roleSegment = pathSegments[0] || '';
+  const roleDashboardPath = `/${roleSegment}/dashboard`;
+  const isRoleDashboard = location.pathname === roleDashboardPath;
+  const isRolePage = ['admin', 'exam-officer', 'dean', 'hod', 'lecturer', 'student'].includes(roleSegment);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -33,8 +36,8 @@ const Topbar = () => {
   return (
     <div className="topbar">
       <div className="topbar-left">
-        {isAdminPage && !isDashboard && (
-          <Link to="/admin/dashboard" className="back-to-dashboard">
+        {isRolePage && !isRoleDashboard && (
+          <Link to={roleDashboardPath} className="back-to-dashboard">
             ← Back to Dashboard
           </Link>
         )}

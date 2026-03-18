@@ -18,14 +18,20 @@ const LecturerWorkload = () => {
     try {
       setLoading(true);
 
+      const departmentId = user?.department_id || user?.department?.id;
+      if (!departmentId) {
+        setError('Department not assigned to this account. Please contact an administrator.');
+        return;
+      }
+
       // Fetch department lecturers
-      const lecturersResponse = await api.get(`/departments/${user.department_id}/lecturers/`);
+      const lecturersResponse = await api.get(`/departments/${departmentId}/lecturers/`);
       setLecturers(lecturersResponse.data);
 
       // Fetch course assignments for workload calculation
       const assignmentsResponse = await api.get('/course-assignments/');
       const departmentAssignments = assignmentsResponse.data.filter(
-        assignment => assignment.course?.department === user.department_id
+        assignment => assignment.course?.department === departmentId
       );
 
       // Calculate workload per lecturer

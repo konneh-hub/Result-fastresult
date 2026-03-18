@@ -28,12 +28,20 @@ body {
   display: flex;
   min-height: 100vh;
   background-color: var(--background);
+  transition: margin-left 0.3s ease;
 }
 
 .dashboard-content {
   flex: 1;
-  padding: 20px;
+  margin-left: 250px;
+  padding: 70px 15px 15px 15px;
   background-color: var(--background);
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar.collapsed ~ .dashboard-content {
+  margin-left: 70px;
 }
 
 .management-header {

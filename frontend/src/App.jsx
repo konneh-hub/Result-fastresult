@@ -119,14 +119,16 @@ function AppContent() {
   const location = useLocation();
 
   const publicPaths = ['/', '/about', '/universities', '/contact', '/login', '/register/student', '/register/lecturer', '/forgot-password'];
+  const dashboardPaths = ['/admin/', '/dean/', '/hod/', '/lecturer/', '/exam-officer/', '/student/'];
 
   const isPublicPage = publicPaths.includes(location.pathname);
-  const isAdminPage = location.pathname.startsWith('/admin/');
+  const isDashboardPage = dashboardPaths.some(path => location.pathname.startsWith(path));
+  const showTopbar = !isPublicPage;
 
   return (
     <div className="App">
       {isPublicPage && <Navbar />}
-      {isAdminPage && <Topbar />}
+      {showTopbar && <Topbar />}
       <main>
         <Routes>
               {/* Public Routes */}
@@ -163,79 +165,81 @@ function AppContent() {
               <Route path="/university-ict admin/*" element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="/university-ict%20admin/*" element={<Navigate to="/admin/dashboard" replace />} />
 
-              <Route path="/exam-officer/dashboard" element={<ProtectedRoute role="Exam Officer"><ExamOfficerDashboard /></ProtectedRoute>} />
-              <Route path="/exam-officer/submitted-results" element={<ProtectedRoute role="Exam Officer"><SubmittedResults /></ProtectedRoute>} />
-              <Route path="/exam-officer/pending-approvals" element={<ProtectedRoute role="Exam Officer"><PendingApprovals /></ProtectedRoute>} />
-              <Route path="/exam-officer/published-results" element={<ProtectedRoute role="Exam Officer"><PublishedResults /></ProtectedRoute>} />
-              <Route path="/exam-officer/alerts" element={<ProtectedRoute role="Exam Officer"><SystemAlerts /></ProtectedRoute>} />
-              <Route path="/exam-officer/verify-results" element={<ProtectedRoute role="Exam Officer"><VerifyResults /></ProtectedRoute>} />
-              <Route path="/exam-officer/grading-policies" element={<ProtectedRoute role="Exam Officer"><GradingPolicies /></ProtectedRoute>} />
-              <Route path="/exam-officer/approve-results" element={<ProtectedRoute role="Exam Officer"><ApproveResults /></ProtectedRoute>} />
-              <Route path="/exam-officer/publish-results" element={<ProtectedRoute role="Exam Officer"><PublishResults /></ProtectedRoute>} />
-              <Route path="/exam-officer/lock-results" element={<ProtectedRoute role="Exam Officer"><LockResults /></ProtectedRoute>} />
-              <Route path="/exam-officer/reopen-results" element={<ProtectedRoute role="Exam Officer"><ReopenResults /></ProtectedRoute>} />
-              <Route path="/exam-officer/corrections" element={<ProtectedRoute role="Exam Officer"><ResultCorrections /></ProtectedRoute>} />
-              <Route path="/exam-officer/reports" element={<ProtectedRoute role="Exam Officer"><ExamOfficerReports /></ProtectedRoute>} />
-              <Route path="/exam-officer/profile" element={<ProtectedRoute role="Exam Officer"><ExamOfficerProfile /></ProtectedRoute>} />
-              <Route path="/exam-officer/change-password" element={<ProtectedRoute role="Exam Officer"><ExamOfficerChangePassword /></ProtectedRoute>} />
+<Route path="/exam-officer/dashboard" element={<ProtectedRoute role="exam_officer"><ExamOfficerDashboard /></ProtectedRoute>} />
+<Route path="/exam-officer/submitted-results" element={<ProtectedRoute role="exam_officer"><SubmittedResults /></ProtectedRoute>} />
+<Route path="/exam-officer/pending-approvals" element={<ProtectedRoute role="exam_officer"><PendingApprovals /></ProtectedRoute>} />
+<Route path="/exam-officer/published-results" element={<ProtectedRoute role="exam_officer"><PublishedResults /></ProtectedRoute>} />
+               <Route path="/exam-officer/alerts" element={<ProtectedRoute role="exam_officer"><SystemAlerts /></ProtectedRoute>} />
+               <Route path="/exam-officer/verify-results" element={<ProtectedRoute role="exam_officer"><VerifyResults /></ProtectedRoute>} />
+               <Route path="/exam-officer/grading-policies" element={<ProtectedRoute role="exam_officer"><GradingPolicies /></ProtectedRoute>} />
+               <Route path="/exam-officer/approve-results" element={<ProtectedRoute role="exam_officer"><ApproveResults /></ProtectedRoute>} />
+               <Route path="/exam-officer/publish-results" element={<ProtectedRoute role="exam_officer"><PublishResults /></ProtectedRoute>} />
+               <Route path="/exam-officer/lock-results" element={<ProtectedRoute role="exam_officer"><LockResults /></ProtectedRoute>} />
+               <Route path="/exam-officer/reopen-results" element={<ProtectedRoute role="exam_officer"><ReopenResults /></ProtectedRoute>} />
+               <Route path="/exam-officer/result-corrections" element={<ProtectedRoute role="exam_officer"><ResultCorrections /></ProtectedRoute>} />
+               <Route path="/exam-officer/reports" element={<ProtectedRoute role="exam_officer"><ExamOfficerReports /></ProtectedRoute>} />
+               <Route path="/exam-officer/profile" element={<ProtectedRoute role="exam_officer"><ExamOfficerProfile /></ProtectedRoute>} />
+               <Route path="/exam-officer/change-password" element={<ProtectedRoute role="exam_officer"><ExamOfficerChangePassword /></ProtectedRoute>} />
 
-              <Route path="/dean/dashboard" element={<ProtectedRoute role="Dean"><DeanDashboard /></ProtectedRoute>} />
-              <Route path="/dean/departments" element={<ProtectedRoute role="Dean"><DeanDepartments /></ProtectedRoute>} />
-              <Route path="/dean/lecturer-activities" element={<ProtectedRoute role="Dean"><LecturerActivities /></ProtectedRoute>} />
-              <Route path="/dean/course-assignments" element={<ProtectedRoute role="Dean"><CourseAssignments /></ProtectedRoute>} />
-              <Route path="/dean/review-results" element={<ProtectedRoute role="Dean"><ReviewResults /></ProtectedRoute>} />
-              <Route path="/dean/approve-results" element={<ProtectedRoute role="Dean"><DeanApproveResults /></ProtectedRoute>} />
-              <Route path="/dean/return-results" element={<ProtectedRoute role="Dean"><ReturnResults /></ProtectedRoute>} />
-              <Route path="/dean/reports" element={<ProtectedRoute role="Dean"><DeanReports /></ProtectedRoute>} />
-              <Route path="/dean/profile" element={<ProtectedRoute role="Dean"><DeanProfile /></ProtectedRoute>} />
-              <Route path="/dean/change-password" element={<ProtectedRoute role="Dean"><DeanChangePassword /></ProtectedRoute>} />
+              <Route path="/dean" element={<Navigate to="/dean/dashboard" replace />} />
+              <Route path="/dean/dashboard" element={<ProtectedRoute role="dean"><DeanDashboard /></ProtectedRoute>} />
+              <Route path="/dean/departments" element={<ProtectedRoute role="dean"><DeanDepartments /></ProtectedRoute>} />
+              <Route path="/dean/lecturer-activities" element={<ProtectedRoute role="dean"><LecturerActivities /></ProtectedRoute>} />
+              <Route path="/dean/course-assignments" element={<ProtectedRoute role="dean"><CourseAssignments /></ProtectedRoute>} />
+              <Route path="/dean/review-results" element={<ProtectedRoute role="dean"><ReviewResults /></ProtectedRoute>} />
+              <Route path="/dean/approve-results" element={<ProtectedRoute role="dean"><DeanApproveResults /></ProtectedRoute>} />
+              <Route path="/dean/return-results" element={<ProtectedRoute role="dean"><ReturnResults /></ProtectedRoute>} />
+              <Route path="/dean/reports" element={<ProtectedRoute role="dean"><DeanReports /></ProtectedRoute>} />
+              <Route path="/dean/profile" element={<ProtectedRoute role="dean"><DeanProfile /></ProtectedRoute>} />
+              <Route path="/dean/change-password" element={<ProtectedRoute role="dean"><DeanChangePassword /></ProtectedRoute>} />
 
-              <Route path="/hod/dashboard" element={<ProtectedRoute role="Head of Department"><HODDashboard /></ProtectedRoute>} />
-              <Route path="/hod/department-stats" element={<ProtectedRoute role="Head of Department"><DepartmentStats /></ProtectedRoute>} />
-              <Route path="/hod/lecturer-workload" element={<ProtectedRoute role="Head of Department"><LecturerWorkload /></ProtectedRoute>} />
-              <Route path="/hod/assign-courses" element={<ProtectedRoute role="Head of Department"><HodAssignCourses /></ProtectedRoute>} />
-              <Route path="/hod/monitor-submissions" element={<ProtectedRoute role="Head of Department"><MonitorSubmissions /></ProtectedRoute>} />
-              <Route path="/hod/verify-results" element={<ProtectedRoute role="Head of Department"><HodVerifyResults /></ProtectedRoute>} />
-              <Route path="/hod/return-corrections" element={<ProtectedRoute role="Head of Department"><ReturnCorrections /></ProtectedRoute>} />
-              <Route path="/hod/submit-to-dean" element={<ProtectedRoute role="Head of Department"><SubmitToDean /></ProtectedRoute>} />
-              <Route path="/hod/reports" element={<ProtectedRoute role="Head of Department"><HodReports /></ProtectedRoute>} />
-              <Route path="/hod/notifications" element={<ProtectedRoute role="Head of Department"><HodNotifications /></ProtectedRoute>} />
-              <Route path="/hod/profile" element={<ProtectedRoute role="Head of Department"><HodProfile /></ProtectedRoute>} />
-              <Route path="/hod/change-password" element={<ProtectedRoute role="Head of Department"><HodChangePassword /></ProtectedRoute>} />
+              <Route path="/hod" element={<Navigate to="/hod/dashboard" replace />} />
+              <Route path="/hod/dashboard" element={<ProtectedRoute role="hod"><HODDashboard /></ProtectedRoute>} />
+              <Route path="/hod/department-stats" element={<ProtectedRoute role="hod"><DepartmentStats /></ProtectedRoute>} />
+              <Route path="/hod/lecturer-workload" element={<ProtectedRoute role="hod"><LecturerWorkload /></ProtectedRoute>} />
+              <Route path="/hod/assign-courses" element={<ProtectedRoute role="hod"><HodAssignCourses /></ProtectedRoute>} />
+              <Route path="/hod/monitor-submissions" element={<ProtectedRoute role="hod"><MonitorSubmissions /></ProtectedRoute>} />
+              <Route path="/hod/verify-results" element={<ProtectedRoute role="hod"><HodVerifyResults /></ProtectedRoute>} />
+              <Route path="/hod/return-corrections" element={<ProtectedRoute role="hod"><ReturnCorrections /></ProtectedRoute>} />
+              <Route path="/hod/submit-to-dean" element={<ProtectedRoute role="hod"><SubmitToDean /></ProtectedRoute>} />
+              <Route path="/hod/reports" element={<ProtectedRoute role="hod"><HodReports /></ProtectedRoute>} />
+              <Route path="/hod/notifications" element={<ProtectedRoute role="hod"><HodNotifications /></ProtectedRoute>} />
+              <Route path="/hod/profile" element={<ProtectedRoute role="hod"><HodProfile /></ProtectedRoute>} />
+              <Route path="/hod/change-password" element={<ProtectedRoute role="hod"><HodChangePassword /></ProtectedRoute>} />
 
-              <Route path="/lecturer/dashboard" element={<ProtectedRoute role="Lecturer"><LecturerDashboard /></ProtectedRoute>} />
-              <Route path="/lecturer/assigned-courses" element={<ProtectedRoute role="Lecturer"><AssignedCourses /></ProtectedRoute>} />
-              <Route path="/lecturer/course-students" element={<ProtectedRoute role="Lecturer"><CourseStudents /></ProtectedRoute>} />
-              <Route path="/lecturer/course-materials" element={<ProtectedRoute role="Lecturer"><CourseMaterials /></ProtectedRoute>} />
-              <Route path="/lecturer/assessments" element={<ProtectedRoute role="Lecturer"><ContinuousAssessments /></ProtectedRoute>} />
-              <Route path="/lecturer/upload-scores" element={<ProtectedRoute role="Lecturer"><UploadScores /></ProtectedRoute>} />
-              <Route path="/lecturer/edit-scores" element={<ProtectedRoute role="Lecturer"><EditScores /></ProtectedRoute>} />
-              <Route path="/lecturer/calculate-grades" element={<ProtectedRoute role="Lecturer"><CalculateGrades /></ProtectedRoute>} />
-              <Route path="/lecturer/submit-results" element={<ProtectedRoute role="Lecturer"><SubmitResults /></ProtectedRoute>} />
-              <Route path="/lecturer/performance" element={<ProtectedRoute role="Lecturer"><LecturerPerformance /></ProtectedRoute>} />
-              <Route path="/lecturer/notifications" element={<ProtectedRoute role="Lecturer"><LecturerNotifications /></ProtectedRoute>} />
-              <Route path="/lecturer/profile" element={<ProtectedRoute role="Lecturer"><LecturerProfile /></ProtectedRoute>} />
-              <Route path="/lecturer/change-password" element={<ProtectedRoute role="Lecturer"><LecturerChangePassword /></ProtectedRoute>} />
+              <Route path="/lecturer/dashboard" element={<ProtectedRoute role="lecturer"><LecturerDashboard /></ProtectedRoute>} />
+              <Route path="/lecturer/assigned-courses" element={<ProtectedRoute role="lecturer"><AssignedCourses /></ProtectedRoute>} />
+              <Route path="/lecturer/course-students" element={<ProtectedRoute role="lecturer"><CourseStudents /></ProtectedRoute>} />
+              <Route path="/lecturer/course-materials" element={<ProtectedRoute role="lecturer"><CourseMaterials /></ProtectedRoute>} />
+              <Route path="/lecturer/assessments" element={<ProtectedRoute role="lecturer"><ContinuousAssessments /></ProtectedRoute>} />
+              <Route path="/lecturer/upload-scores" element={<ProtectedRoute role="lecturer"><UploadScores /></ProtectedRoute>} />
+              <Route path="/lecturer/edit-scores" element={<ProtectedRoute role="lecturer"><EditScores /></ProtectedRoute>} />
+              <Route path="/lecturer/calculate-grades" element={<ProtectedRoute role="lecturer"><CalculateGrades /></ProtectedRoute>} />
+              <Route path="/lecturer/submit-results" element={<ProtectedRoute role="lecturer"><SubmitResults /></ProtectedRoute>} />
+              <Route path="/lecturer/performance" element={<ProtectedRoute role="lecturer"><LecturerPerformance /></ProtectedRoute>} />
+              <Route path="/lecturer/notifications" element={<ProtectedRoute role="lecturer"><LecturerNotifications /></ProtectedRoute>} />
+              <Route path="/lecturer/profile" element={<ProtectedRoute role="lecturer"><LecturerProfile /></ProtectedRoute>} />
+              <Route path="/lecturer/change-password" element={<ProtectedRoute role="lecturer"><LecturerChangePassword /></ProtectedRoute>} />
 
-              <Route path="/student/dashboard" element={<ProtectedRoute role="Student"><StudentDashboard /></ProtectedRoute>} />
-              <Route path="/student/results" element={<ProtectedRoute role="Student"><StudentResults /></ProtectedRoute>} />
-              <Route path="/student/download-slip" element={<ProtectedRoute role="Student"><StudentDownloadSlip /></ProtectedRoute>} />
-              <Route path="/student/gpa-cgpa" element={<ProtectedRoute role="Student"><StudentGpaCgpa /></ProtectedRoute>} />
-              <Route path="/student/history" element={<ProtectedRoute role="Student"><StudentHistory /></ProtectedRoute>} />
-              <Route path="/student/courses" element={<ProtectedRoute role="Student"><StudentCourseInfo /></ProtectedRoute>} />
-              <Route path="/student/progress" element={<ProtectedRoute role="Student"><StudentProgress /></ProtectedRoute>} />
-              <Route path="/student/gpa-calculator" element={<ProtectedRoute role="Student"><StudentGpaCalculator /></ProtectedRoute>} />
-              <Route path="/student/graduation-tracker" element={<ProtectedRoute role="Student"><GraduationTracker /></ProtectedRoute>} />
-              <Route path="/student/transcript" element={<ProtectedRoute role="Student"><TranscriptRequest /></ProtectedRoute>} />
-              <Route path="/student/profile" element={<ProtectedRoute role="Student"><StudentProfile /></ProtectedRoute>} />
-              <Route path="/student/change-password" element={<ProtectedRoute role="Student"><StudentChangePassword /></ProtectedRoute>} />
-              <Route path="/student/notifications" element={<ProtectedRoute role="Student"><StudentNotifications /></ProtectedRoute>} />
-              <Route path="/student/calendar" element={<ProtectedRoute role="Student"><AcademicCalendar /></ProtectedRoute>} />
-              <Route path="/student/help" element={<ProtectedRoute role="Student"><HelpSupport /></ProtectedRoute>} />
-              <Route path="/student/download-docs" element={<ProtectedRoute role="Student"><DownloadDocuments /></ProtectedRoute>} />
+              <Route path="/student/dashboard" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
+              <Route path="/student/results" element={<ProtectedRoute role="student"><StudentResults /></ProtectedRoute>} />
+              <Route path="/student/download-slip" element={<ProtectedRoute role="student"><StudentDownloadSlip /></ProtectedRoute>} />
+              <Route path="/student/gpa-cgpa" element={<ProtectedRoute role="student"><StudentGpaCgpa /></ProtectedRoute>} />
+              <Route path="/student/history" element={<ProtectedRoute role="student"><StudentHistory /></ProtectedRoute>} />
+              <Route path="/student/courses" element={<ProtectedRoute role="student"><StudentCourseInfo /></ProtectedRoute>} />
+              <Route path="/student/progress" element={<ProtectedRoute role="student"><StudentProgress /></ProtectedRoute>} />
+              <Route path="/student/gpa-calculator" element={<ProtectedRoute role="student"><StudentGpaCalculator /></ProtectedRoute>} />
+              <Route path="/student/graduation-tracker" element={<ProtectedRoute role="student"><GraduationTracker /></ProtectedRoute>} />
+              <Route path="/student/transcript" element={<ProtectedRoute role="student"><TranscriptRequest /></ProtectedRoute>} />
+              <Route path="/student/profile" element={<ProtectedRoute role="student"><StudentProfile /></ProtectedRoute>} />
+              <Route path="/student/change-password" element={<ProtectedRoute role="student"><StudentChangePassword /></ProtectedRoute>} />
+              <Route path="/student/notifications" element={<ProtectedRoute role="student"><StudentNotifications /></ProtectedRoute>} />
+              <Route path="/student/calendar" element={<ProtectedRoute role="student"><AcademicCalendar /></ProtectedRoute>} />
+              <Route path="/student/help" element={<ProtectedRoute role="student"><HelpSupport /></ProtectedRoute>} />
+              <Route path="/student/download-docs" element={<ProtectedRoute role="student"><DownloadDocuments /></ProtectedRoute>} />
             </Routes>
           </main>
-          <Footer />
+          {!isDashboardPage && <Footer />}
         </div>
       );
     }

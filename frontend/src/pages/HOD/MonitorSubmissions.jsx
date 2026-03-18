@@ -20,18 +20,24 @@ const MonitorSubmissions = () => {
     try {
       setLoading(true);
 
+      const departmentId = user?.department_id || user?.department?.id;
+      if (!departmentId) {
+        setError('Department not assigned to this account. Please contact an administrator.');
+        return;
+      }
+
       // Fetch department courses
-      const coursesResponse = await api.get(`/departments/${user.department_id}/courses/`);
+      const coursesResponse = await api.get(`/departments/${departmentId}/courses/`);
       setCourses(coursesResponse.data);
 
       // Fetch department lecturers
-      const lecturersResponse = await api.get(`/departments/${user.department_id}/lecturers/`);
+      const lecturersResponse = await api.get(`/departments/${departmentId}/lecturers/`);
       setLecturers(lecturersResponse.data);
 
       // Fetch results for department courses
       const resultsResponse = await api.get('/results/');
       const departmentResults = resultsResponse.data.filter(
-        result => result.course_registration?.course?.department === user.department_id
+        result => result.course_registration?.course?.department === departmentId
       );
 
       // Group results by course and lecturer

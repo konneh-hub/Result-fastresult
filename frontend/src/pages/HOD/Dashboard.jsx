@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import AuthContext from '../../contexts/AuthContext';
 import api from '../../services/api';
+import Sidebar from '../../components/Sidebar';
 import './HOD.css';
 
 const Dashboard = () => {
@@ -19,8 +21,14 @@ const Dashboard = () => {
     try {
       setLoading(true);
 
+      const departmentId = user?.department_id || user?.department?.id;
+      if (!departmentId) {
+        setError('Department not assigned to this account. Please contact an administrator.');
+        return;
+      }
+
       // Fetch department statistics
-      const statsResponse = await api.get(`/departments/${user.department_id}/`);
+      const statsResponse = await api.get(`/departments/${departmentId}/`);
       setDepartmentStats(statsResponse.data);
 
       // Fetch recent activities (you might need to create this endpoint)
@@ -42,7 +50,10 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="dashboard-container">
-        <div className="loading">Loading dashboard...</div>
+        <Sidebar />
+        <div className="dashboard-content">
+          <div className="loading">Loading dashboard...</div>
+        </div>
       </div>
     );
   }
@@ -50,13 +61,17 @@ const Dashboard = () => {
   if (error) {
     return (
       <div className="dashboard-container">
-        <div className="error">{error}</div>
+        <Sidebar />
+        <div className="dashboard-content">
+          <div className="error">{error}</div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="dashboard-container">
+      <Sidebar />
       <div className="dashboard-content">
         <div className="management-header">
           <h1>Head of Department Dashboard</h1>
@@ -93,21 +108,21 @@ const Dashboard = () => {
         <div className="dashboard-section">
           <h2>Quick Actions</h2>
           <div className="action-buttons">
-            <button className="btn" onClick={() => window.location.href = '/hod/assign-courses'}>
+            <Link className="btn" to="/hod/assign-courses">
               Assign Courses
-            </button>
-            <button className="btn" onClick={() => window.location.href = '/hod/verify-results'}>
+            </Link>
+            <Link className="btn" to="/hod/verify-results">
               Verify Results
-            </button>
-            <button className="btn" onClick={() => window.location.href = '/hod/monitor-submissions'}>
+            </Link>
+            <Link className="btn" to="/hod/monitor-submissions">
               Monitor Submissions
-            </button>
-            <button className="btn" onClick={() => window.location.href = '/hod/department-stats'}>
+            </Link>
+            <Link className="btn" to="/hod/department-stats">
               View Statistics
-            </button>
-            <button className="btn" onClick={() => window.location.href = '/hod/reports'}>
+            </Link>
+            <Link className="btn" to="/hod/reports">
               Generate Reports
-            </button>
+            </Link>
           </div>
         </div>
 

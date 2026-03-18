@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../services/api';
+import Sidebar from '../../components/Sidebar';
+import './Dashboard.css';
 
 const Dashboard = () => {
   const [overview, setOverview] = useState(null);
@@ -31,54 +34,57 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="dashboard">
-      <h1>Dean Dashboard</h1>
+    <div className="dean-dashboard">
+      <Sidebar />
+      <div className="dean-dashboard-main">
+        <h1>Dean Dashboard</h1>
 
-      {overview && (
-        <div className="stats">
-          <div className="stat-card">
-            <h3>Faculty</h3>
-            <p>{overview.faculty?.name}</p>
+        {overview && (
+          <div className="stats">
+            <div className="stat-card">
+              <h3>Faculty</h3>
+              <p>{overview.faculty?.name || 'Not assigned'}</p>
+            </div>
+            <div className="stat-card">
+              <h3>Departments</h3>
+              <p>{overview.stats.departments}</p>
+            </div>
+            <div className="stat-card">
+              <h3>Courses</h3>
+              <p>{overview.stats.courses}</p>
+            </div>
+            <div className="stat-card">
+              <h3>Lecturers</h3>
+              <p>{overview.stats.lecturers}</p>
+            </div>
+            <div className="stat-card">
+              <h3>Students</h3>
+              <p>{overview.stats.students}</p>
+            </div>
+            <div className="stat-card">
+              <h3>Pending Submissions</h3>
+              <p>{overview.stats.pending_submissions}</p>
+            </div>
+            <div className="stat-card">
+              <h3>Pending Approvals</h3>
+              <p>{overview.stats.pending_approvals}</p>
+            </div>
           </div>
-          <div className="stat-card">
-            <h3>Departments</h3>
-            <p>{overview.stats.departments}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Courses</h3>
-            <p>{overview.stats.courses}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Lecturers</h3>
-            <p>{overview.stats.lecturers}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Students</h3>
-            <p>{overview.stats.students}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Pending Submissions</h3>
-            <p>{overview.stats.pending_submissions}</p>
-          </div>
-          <div className="stat-card">
-            <h3>Pending Approvals</h3>
-            <p>{overview.stats.pending_approvals}</p>
-          </div>
+        )}
+
+        <div className="dashboard-nav">
+          <h2>Quick Links</h2>
+          <ul>
+            <li><Link to="/dean/departments">Departments</Link></li>
+            <li><Link to="/dean/course-assignments">Course Assignments</Link></li>
+            <li><Link to="/dean/review-results">Review Results</Link></li>
+            <li><Link to="/dean/approve-results">Approve Results</Link></li>
+            <li><Link to="/dean/return-results">Return Results</Link></li>
+            <li><Link to="/dean/lecturer-activities">Lecturer Activities</Link></li>
+            <li><Link to="/dean/profile">Profile Settings</Link></li>
+            <li><Link to="/dean/change-password">Change Password</Link></li>
+          </ul>
         </div>
-      )}
-
-      <div className="dashboard-nav">
-        <h2>Quick Links</h2>
-        <ul>
-          <li><a href="/dean/departments">Departments</a></li>
-          <li><a href="/dean/course-assignments">Course Assignments</a></li>
-          <li><a href="/dean/review-results">Review Results</a></li>
-          <li><a href="/dean/approve-results">Approve Results</a></li>
-          <li><a href="/dean/return-results">Return Results</a></li>
-          <li><a href="/dean/lecturer-activities">Lecturer Activities</a></li>
-          <li><a href="/dean/profile">Profile Settings</a></li>
-          <li><a href="/dean/change-password">Change Password</a></li>
-        </ul>
       </div>
     </div>
   );

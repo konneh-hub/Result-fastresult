@@ -56,15 +56,18 @@ const Reports = () => {
   };
 
   const generateDepartmentOverview = async () => {
+    const departmentId = user?.department_id || user?.department?.id;
+    if (!departmentId) throw new Error('Department not assigned');
+
     const [studentsRes, lecturersRes, coursesRes, resultsRes] = await Promise.all([
-      api.get(`/departments/${user.department_id}/students/`),
-      api.get(`/departments/${user.department_id}/lecturers/`),
-      api.get(`/departments/${user.department_id}/courses/`),
+      api.get(`/departments/${departmentId}/students/`),
+      api.get(`/departments/${departmentId}/lecturers/`),
+      api.get(`/departments/${departmentId}/courses/`),
       api.get('/results/')
     ]);
 
     const departmentResults = resultsRes.data.filter(
-      result => result.course_registration?.course?.department === user.department_id
+      result => result.course_registration?.course?.department === departmentId
     );
 
     return {
@@ -110,13 +113,16 @@ const Reports = () => {
   };
 
   const generateLecturerWorkload = async () => {
+    const departmentId = user?.department_id || user?.department?.id;
+    if (!departmentId) throw new Error('Department not assigned');
+
     const [lecturersRes, assignmentsRes] = await Promise.all([
-      api.get(`/departments/${user.department_id}/lecturers/`),
+      api.get(`/departments/${departmentId}/lecturers/`),
       api.get('/course-assignments/')
     ]);
 
     const departmentAssignments = assignmentsRes.data.filter(
-      assignment => assignment.course?.department === user.department_id
+      assignment => assignment.course?.department === departmentId
     );
 
     const workloadData = lecturersRes.data.map(lecturer => {
